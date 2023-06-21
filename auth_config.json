@@ -1,0 +1,12 @@
+{
+  "eas_server": {
+    "host": "<eas-host>",
+    "port": 443,
+    "protocol": "https",
+    "client_id": "<client_id>",
+    "username": "<username@email.com>",
+    "password": "<password>",
+    "verify_certificate": true,
+    "ca_filename": null
+  }
+}
