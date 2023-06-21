@@ -1,0 +1,14 @@
+{
+  "feeders": [
+    "feeder1",
+    "feeder2"
+  ],
+  "years": [
+    2023,
+    2024
+  ],
+  "scenarios": [
+    "base",
+    "low"
+  ]
+}

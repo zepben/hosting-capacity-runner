@@ -4,9 +4,12 @@ from typing import Dict
 from zepben.eas.client.eas_client import EasClient
 
 
-def get_feeders():
-    with open("feeders.txt", "r") as f:
-        return list({word.strip() for word in f})
+def get_config():
+    config = read_json_config("config.json")
+    config["feeders"] = list({f for f in config["feeders"]})
+    config["years"] = list({f for f in config["years"]})
+    config["scenarios"] = list({f for f in config["scenarios"]})
+    return config
 
 
 def get_client():

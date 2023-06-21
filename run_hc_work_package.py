@@ -2,17 +2,17 @@ import asyncio
 
 from zepben.eas.client.work_package import WorkPackageConfig
 
-from utils import get_client, get_feeders
+from utils import get_client, get_config
 
 
 async def main():
-    feeders = get_feeders()
+    config = get_config()
     eas_client = get_client()
     result = await eas_client.async_run_hosting_capacity_work_package(
         WorkPackageConfig(
-            list(feeders),
-            [2023],
-            ["base"]
+            config["feeders"],
+            config["years"],
+            config["scenarios"]
         )
     )
 

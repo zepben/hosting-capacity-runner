@@ -1,3 +1,0 @@
-feeder1
-feeder2
-feeder3
