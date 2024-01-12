@@ -7,7 +7,7 @@ from zepben.eas.client.eas_client import EasClient
 def get_config():
     config = read_json_config("config.json")
     config["feeders"] = list({f for f in config["feeders"]})
-    config["years"] = list({f for f in config["years"]})
+    config["forecast_years"] = list({f for f in config["forecast_years"]})
     config["scenarios"] = list({f for f in config["scenarios"]})
     return config
 
