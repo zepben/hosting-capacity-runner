@@ -1,6 +1,7 @@
 import asyncio
+from datetime import datetime
 
-from zepben.eas.client.work_package import WorkPackageConfig
+from zepben.eas.client.work_package import WorkPackageConfig, ModelConfig, TimePeriod
 
 from utils import get_client, get_config
 
@@ -11,13 +12,19 @@ async def main():
     result = await eas_client.async_run_hosting_capacity_work_package(
         WorkPackageConfig(
             config["feeders"],
-            config["years"],
-            config["scenarios"]
+            config["forecast_years"],
+            config["scenarios"],
+            model_config=ModelConfig(
+                load_time=TimePeriod(
+                    start_time=datetime.fromisoformat(config["load_time"]["start"]),
+                    end_time=datetime.fromisoformat(config["load_time"]["end"])
+                )
+            )
         )
     )
 
     if "data" in result:
-        print(f'work_package_id={result["data"]["runHostingCapacity"]}')
+        print(f'work_package_id={result["data"]["runHostingCapacityWorkPackage"]}')
     else:
         print(f"errors:\n{result['errors'].join(', ')}")
 
