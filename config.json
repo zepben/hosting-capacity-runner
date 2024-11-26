@@ -1,4 +1,5 @@
 {
+  "work_package_name": "test_work_package",
   "feeders": [
     "feeder1",
     "feeder2"
