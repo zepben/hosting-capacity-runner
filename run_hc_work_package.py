@@ -2,7 +2,8 @@ import asyncio
 import sys
 from datetime import datetime
 
-from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod
+from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
+    MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig
 
 from utils import get_client, get_config, print_result, get_config_dir
 
@@ -16,11 +17,30 @@ async def main(argv):
             config["feeders"],
             config["forecast_years"],
             config["scenarios"],
+            name="test",
             load_time=TimePeriod(
                 start_time=datetime.fromisoformat(config["load_time"]["start"]),
                 end_time=datetime.fromisoformat(config["load_time"]["end"])
             ),
-            name=config["work_package_name"]
+            result_processor_config=ResultProcessorConfig(
+                writer_config=WriterConfig(
+                    output_writer_config=WriterOutputConfig(
+                        enhanced_metrics_config=EnhancedMetricsConfig(
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                        ))),
+                stored_results=StoredResultsConfig(True, True, True, True),
+                metrics=MetricsResultsConfig(True)
+            ),
+            quality_assurance_processing=True
         )
     )
 
