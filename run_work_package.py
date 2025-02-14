@@ -6,7 +6,7 @@ from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, Result
     MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
     FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig
 
-from utils import get_client, get_config, print_result, get_config_dir
+from utils import get_client, get_config, print_run, get_config_dir
 
 
 async def main(argv):
@@ -15,7 +15,7 @@ async def main(argv):
     eas_client = get_client(config_dir)
     result = await eas_client.async_run_hosting_capacity_work_package(
         WorkPackageConfig(
-            name="test",
+            name=config["work_package_name"],
             feeders=config["feeders"],
             years=config["forecast_years"],
             scenarios=config["scenarios"],
@@ -70,7 +70,7 @@ async def main(argv):
         )
     )
 
-    print_result(result)
+    print_run(result)
     await eas_client.aclose()
 
 

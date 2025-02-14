@@ -36,8 +36,27 @@ def read_json_config(config_file_path: str) -> Dict:
     return config_dict
 
 
-def print_result(result):
+def print_cancel(result):
+    if "data" in result:
+        print(f'work_package_id=\n{result["data"]["cancelWorkPackage"]}')
+    else:
+        if "404" in result["errors"][0]["message"]:
+            print("No work package running with provided ID")
+        else:
+            print("Errors:\n", "\n".join(err["message"] for err in result['errors']))
+
+
+def print_run(result):
     if "data" in result:
         print(f'work_package_id=\n{result["data"]["runWorkPackage"]}')
     else:
         print("Errors:\n", "\n".join(err["message"] for err in result['errors']))
+
+
+def print_progress(result):
+    print("------------------------------")
+    if "data" in result:
+        print(str(json.dumps(result["data"]["getWorkPackageProgress"], indent=4)))
+    else:
+        print("Errors:\n".join(err["message"] for err in result['errors']))
+    print("------------------------------")

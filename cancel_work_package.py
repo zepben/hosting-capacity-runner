@@ -1,17 +1,16 @@
 import asyncio
 import sys
 
-from utils import get_client, print_result, get_config_dir
+from utils import get_client, get_config_dir, print_cancel
 
 
 async def main(argv):
     config_dir = get_config_dir(argv)
     eas_client = get_client(config_dir)
-    result = await eas_client.async_cancel_hosting_capacity_work_package(
-        "<work_package_id_to_cancel>"
-    )
+    work_package_id = input("Please enter ID of work package to cancel: ")
+    result = await eas_client.async_cancel_hosting_capacity_work_package(work_package_id)
 
-    print_result(result)
+    print_cancel(result)
     await eas_client.aclose()
 
 
