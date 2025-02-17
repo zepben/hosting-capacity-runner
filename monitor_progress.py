@@ -12,6 +12,7 @@ async def print_loop(argv):
 
     while not exit_flag:
         result = await eas_client.async_get_hosting_capacity_work_packages_progress()
+        print("Press ENTER to stop monitor...")
         print_progress(result)
         await asyncio.sleep(5)
     await eas_client.aclose()
