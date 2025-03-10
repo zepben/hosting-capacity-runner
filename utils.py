@@ -3,6 +3,10 @@ from typing import Dict
 
 from zepben.eas.client.eas_client import EasClient
 
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
+logger = logging.getLogger()
+
 
 def get_config_dir(argv):
     return argv[1] if len(argv) > 1 else "."
@@ -54,9 +58,9 @@ def print_run(result):
 
 
 def print_progress(result):
-    print("------------------------------")
+    logger.info("------------------------------")
     if "data" in result:
-        print(str(json.dumps(result["data"]["getWorkPackageProgress"], indent=4)))
+        logger.info(f'Progress: \n{str(json.dumps(result["data"]["getWorkPackageProgress"], indent=4))}')
     else:
-        print("Errors:\n".join(err["message"] for err in result['errors']))
-    print("------------------------------")
+        logger.error("Errors:\n".join(err["message"] for err in result['errors']))
+    logger.info("------------------------------")
