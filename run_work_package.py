@@ -4,7 +4,7 @@ from datetime import datetime
 
 from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
     MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig
+    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig, MeterPlacementConfig, SwitchMeterPlacementConfig, SwitchClass, WriterType
 
 from utils import get_client, get_config, print_run, get_config_dir
 
@@ -25,13 +25,19 @@ async def main(argv):
             ),
             generator_config=GeneratorConfig(
                 model=ModelConfig(
+                    meter_placement_config=MeterPlacementConfig(
+                        switch_meter_placement_configs=[SwitchMeterPlacementConfig(
+                            meter_switch_class=SwitchClass.DISCONNECTOR,
+                            name_pattern=".*Circuit Head Switch.*"
+                        )]
+                    ),
                     vmax_pu=1.2,
                     vmin_pu=0.8,
                     p_factor_base_exports=-1,
                     p_factor_base_imports=1,
-                    p_factor_forecast_pv=1,
-                    fix_single_phase_loads=False,
-                    max_single_phase_load=15000.0,
+                    p_factor_forecast_pv=0.98,
+                    fix_single_phase_loads=True,
+                    max_single_phase_load=20000.0,
                     max_load_service_line_ratio=1.0,
                     max_load_lv_line_ratio=2.0,
                     max_load_tx_ratio=2.0,
@@ -39,9 +45,9 @@ async def main(argv):
                     fix_overloading_consumers=True,
                     fix_undersized_service_lines=True,
                     feeder_scenario_allocation_strategy=FeederScenarioAllocationStrategy.ADDITIVE,
-                    closed_loop_v_reg_enabled=False,
+                    closed_loop_v_reg_enabled=True,
                     closed_loop_v_reg_set_point=0.9925,
-                    seed=123,
+                    seed=123
                 ),
                 solve=SolveConfig(step_size_minutes=30.0),
                 raw_results=RawResultsConfig(True, True, True, True, True)
@@ -49,11 +55,11 @@ async def main(argv):
 
             result_processor_config=ResultProcessorConfig(
                 writer_config=WriterConfig(
-
+                    writer_type=WriterType.PARQUET,
                     output_writer_config=WriterOutputConfig(
                         enhanced_metrics_config=EnhancedMetricsConfig(
                             True,
-                            True,
+                            False,
                             True,
                             True,
                             True,
@@ -63,7 +69,7 @@ async def main(argv):
                             True,
                             True,
                         ))),
-                stored_results=StoredResultsConfig(True, True, True, True),
+                stored_results=StoredResultsConfig(False, False, True, False),
                 metrics=MetricsResultsConfig(True)
             ),
             quality_assurance_processing=True

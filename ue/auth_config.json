@@ -1,0 +1,10 @@
+{
+  "eas_server": {
+    "host": "ue.zb.energy",
+    "port": 443,
+    "protocol": "https",
+    "access_token": "<TOKEN>",
+    "verify_certificate": true,
+    "ca_filename": null
+  }
+}

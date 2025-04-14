@@ -53,14 +53,18 @@ def print_cancel(result):
 def print_run(result):
     if "data" in result:
         print(f'work_package_id=\n{result["data"]["runWorkPackage"]}')
-    else:
+    elif "errors" in result:
         print("Errors:\n", "\n".join(err["message"] for err in result['errors']))
+    else:
+        print(result)
 
 
 def print_progress(result):
     logger.info("------------------------------")
     if "data" in result:
         logger.info(f'Progress: \n{str(json.dumps(result["data"]["getWorkPackageProgress"], indent=4))}')
-    else:
+    elif "errors" in result:
         logger.error("Errors:\n".join(err["message"] for err in result['errors']))
+    else:
+        logger.error(result)
     logger.info("------------------------------")
