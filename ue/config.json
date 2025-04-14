@@ -1,0 +1,16 @@
+{
+  "work_package_name": "test_work_package",
+  "feeders": [
+    "CRM24"
+  ],
+  "load_time": {
+    "start": "2022-04-01T00:00",
+    "end": "2023-04-01T00:00"
+  },
+  "forecast_years": [
+    2023
+  ],
+  "scenarios": [
+    "base"
+  ]
+}
