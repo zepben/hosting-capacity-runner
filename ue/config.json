@@ -1,16 +1,38 @@
 {
-  "work_package_name": "test_work_package",
+  "work_package_name": "test_work_package_2",
   "feeders": [
-    "CRM24"
+    "CRM24",
+    "CDA11",
+    "CDA21",
+    "DC02",
+    "DN04",
+    "DN06",
+    "EM03",
+    "EM05",
+    "GW05",
+    "GW06",
+    "LD02"
   ],
   "load_time": {
     "start": "2022-04-01T00:00",
     "end": "2023-04-01T00:00"
   },
   "forecast_years": [
-    2023
+    2023,
+    2024,
+    2025,
+    2026,
+    2027,
+    2028,
+    2029,
+    2030,
+    2031,
+    2032,
+    2033,
+    2034,
+    2035
   ],
   "scenarios": [
-    "base"
+    "1"
   ]
 }
