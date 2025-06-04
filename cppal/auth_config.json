@@ -1,0 +1,11 @@
+{
+  "eas_server": {
+    "host": "cppal.zb.energy",
+    "port": 443,
+    "protocol": "https",
+    "client_id": "402a3ea0-634d-4bb9-a59f-fa15e927a000",
+    "access_token": "<token>",
+    "verify_certificate": true,
+    "ca_filename": null
+  }
+}

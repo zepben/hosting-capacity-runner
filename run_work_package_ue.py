@@ -4,14 +4,14 @@ from datetime import datetime
 
 from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
     MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig, MeterPlacementConfig, SwitchMeterPlacementConfig, SwitchClass, WriterType
+    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig, MeterPlacementConfig, SwitchMeterPlacementConfig, \
+    SwitchClass, WriterType
 
 from utils import get_client, get_config, print_run, get_config_dir
 
 
 async def main(argv):
     config_dir = get_config_dir(argv)
-    print(f"Running work package with config dir {config_dir}")
     config = get_config(config_dir)
     eas_client = get_client(config_dir)
     result = await eas_client.async_run_hosting_capacity_work_package(
@@ -38,7 +38,7 @@ async def main(argv):
                     p_factor_base_imports=1,
                     p_factor_forecast_pv=0.98,
                     fix_single_phase_loads=True,
-                    max_single_phase_load=20000.0,
+                    max_single_phase_load=15000.0,
                     max_load_service_line_ratio=1.0,
                     max_load_lv_line_ratio=2.0,
                     max_load_tx_ratio=2.0,
@@ -46,9 +46,9 @@ async def main(argv):
                     fix_overloading_consumers=True,
                     fix_undersized_service_lines=True,
                     feeder_scenario_allocation_strategy=FeederScenarioAllocationStrategy.ADDITIVE,
-                    closed_loop_v_reg_enabled=True,
+                    closed_loop_v_reg_enabled=False,
                     closed_loop_v_reg_set_point=0.9925,
-                    seed=123
+                    seed=123,
                 ),
                 solve=SolveConfig(step_size_minutes=30.0),
                 raw_results=RawResultsConfig(True, True, True, True, True)
