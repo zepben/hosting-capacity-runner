@@ -2,11 +2,14 @@ import asyncio
 import sys
 from datetime import datetime
 
+from zepben.eas import FeederConfigs, TimePeriodLoadOverride
 from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
     MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig
+    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig, FeederConfig
 
 from utils import get_client, get_config, print_run, get_config_dir
+
+load = TimePeriodLoadOverride
 
 
 async def main(argv):
@@ -16,12 +19,18 @@ async def main(argv):
     result = await eas_client.async_run_hosting_capacity_work_package(
         WorkPackageConfig(
             name=config["work_package_name"],
-            feeders=config["feeders"],
-            years=config["forecast_years"],
-            scenarios=config["scenarios"],
-            load_time=TimePeriod(
-                start_time=datetime.fromisoformat(config["load_time"]["start"]),
-                end_time=datetime.fromisoformat(config["load_time"]["end"])
+            syf_config=FeederConfigs(
+                configs=[
+                    FeederConfig(
+                        feeder=config["feeders"][0],
+                        years=config["forecast_years"],
+                        scenarios=config["scenarios"],
+                        load_time=TimePeriod(
+                            start_time=datetime.fromisoformat(config["load_time"]["start"]),
+                            end_time=datetime.fromisoformat(config["load_time"]["end"]),
+                        )
+                    )
+                ]
             ),
             generator_config=GeneratorConfig(
                 model=ModelConfig(
