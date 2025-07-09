@@ -1,19 +1,18 @@
 {
   "work_package_name": "test_work_package",
   "feeders": [
-    "feeder1",
-    "feeder2"
+    "feeder1", "feeder2", "feeder3"
   ],
   "load_time": {
-    "start": "2022-01-01T00:00",
-    "end": "2023-01-01T00:00"
+    "start1": "2023-02-22T00:00:00.00Z",
+    "end1": "2024-02-22T00:00:00.00Z",
+    "start2": "2023-07-22T00:00:00.00Z",
+    "end2": "2024-01-22T00:00:00.00Z"
   },
   "forecast_years": [
-    2023,
     2024
   ],
   "scenarios": [
-    "base",
-    "low"
+    "base"
   ]
 }
