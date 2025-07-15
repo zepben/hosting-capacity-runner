@@ -2,16 +2,18 @@ import asyncio
 import sys
 from datetime import datetime
 
-from zepben.eas import FeederConfigs, ForecastConfig, FixedTimeLoadOverride
-from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
+from zepben.eas import FeederConfigs, FixedTimeLoadOverride
+from zepben.eas.client.work_package import WorkPackageConfig, ResultProcessorConfig, StoredResultsConfig, \
     MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig, FeederConfig, TimePeriodLoadOverride, FixedTime
+    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig, FeederConfig, FixedTime
 
 from utils import get_client, get_config, print_run, get_config_dir
 
 """
 This script provides an example of how to run a work package with configuration for overriding the load data for specific 
 loads in the feeders. This allows you to perform single timestep, fixed time studies for a feeder.
+Note overrides are experimental features, and this entails advanced usage of the HCM module. 
+Please contact Zepben to ensure you are creating an efficient and scalable solution with these features.
 """
 
 
@@ -32,7 +34,7 @@ async def main(argv):
             # for your environment.
             FeederConfig(
                 feeder="<FEEDER_MRID_1>",
-                years=[2025],   # Ignored as scenario is base.
+                years=[2025],  # Ignored as scenario is base.
                 scenarios=["base"],
                 load_time=FixedTime(
                     time=datetime.fromisoformat(config["load_time"]["start1"]),

@@ -9,6 +9,12 @@ from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, Result
 
 from utils import get_client, get_config, print_run, get_config_dir
 
+"""
+This script provides an example of how to run a forecast work package for long term planning studies.
+It allows you to configure a WorkPackage to run 10+ years of timeseries load flows for a given set of scenarios for a
+configurable set of feeders.
+"""
+
 
 async def main(argv):
     config_dir = get_config_dir(argv)
