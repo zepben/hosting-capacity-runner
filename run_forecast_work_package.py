@@ -2,10 +2,10 @@ import asyncio
 import sys
 from datetime import datetime
 
-from zepben.eas import FeederConfigs, ForecastConfig, FixedTimeLoadOverride
+from zepben.eas import ForecastConfig
 from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
     MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig, FeederConfig, TimePeriodLoadOverride, FixedTime
+    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig
 
 from utils import get_client, get_config, print_run, get_config_dir
 
