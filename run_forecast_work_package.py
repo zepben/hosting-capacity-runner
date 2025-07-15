@@ -16,7 +16,10 @@ async def main(argv):
     eas_client = get_client(config_dir)
 
     # Forecast Config example set up
-    # This can be set up through config file or by hard coding in the variables.
+    # This can be set up through the config file or by hard coding in the variables below.
+    # The below will run a forecast-based work package for the configured feeders, years, and scenarios, over the time period specified in load_time below.
+    # Note load_time reflects the base year (historical) load, and must be correctly specified to be a period of load data that exists in your system.
+    # Consult your EWB HCM administrator if you do not know what load is available in your environment.
     forecast_config = ForecastConfig(
         feeders=config["feeders"],
         years=config["forecast_years"],
