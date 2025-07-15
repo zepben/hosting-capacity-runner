@@ -2,27 +2,44 @@ import asyncio
 import sys
 from datetime import datetime
 
+from zepben.eas import FeederConfigs, ForecastConfig, FixedTimeLoadOverride
 from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
     MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig
+    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig, FeederConfig, TimePeriodLoadOverride, FixedTime
 
 from utils import get_client, get_config, print_run, get_config_dir
+
+"""
+This script provides an example of how to run a forecast work package for long term planning studies.
+It allows you to configure a WorkPackage to run 10+ years of timeseries load flows for a given set of scenarios for a
+configurable set of feeders.
+"""
 
 
 async def main(argv):
     config_dir = get_config_dir(argv)
     config = get_config(config_dir)
     eas_client = get_client(config_dir)
+
+    # Forecast Config example set up
+    # This can be set up through the config file or by hard coding in the variables below.
+    # The below will run a forecast-based work package for the configured feeders, years, and scenarios, over the time period specified in load_time below.
+    # Note load_time reflects the base year (historical) load, and must be correctly specified to be a period of load data that exists in your system.
+    # Consult your EWB HCM administrator if you do not know what load is available in your environment.
+    forecast_config = ForecastConfig(
+        feeders=config["feeders"],
+        years=config["forecast_years"],
+        scenarios=config["scenarios"],
+        load_time=TimePeriod(
+            start_time=datetime.fromisoformat(config["load_time"]["start1"]),
+            end_time=datetime.fromisoformat(config["load_time"]["end1"]),
+        )
+    )
+
     result = await eas_client.async_run_hosting_capacity_work_package(
         WorkPackageConfig(
             name=config["work_package_name"],
-            feeders=config["feeders"],
-            years=config["forecast_years"],
-            scenarios=config["scenarios"],
-            load_time=TimePeriod(
-                start_time=datetime.fromisoformat(config["load_time"]["start"]),
-                end_time=datetime.fromisoformat(config["load_time"]["end"])
-            ),
+            syf_config=forecast_config,
             generator_config=GeneratorConfig(
                 model=ModelConfig(
                     vmax_pu=1.2,
@@ -49,11 +66,10 @@ async def main(argv):
 
             result_processor_config=ResultProcessorConfig(
                 writer_config=WriterConfig(
-
                     output_writer_config=WriterOutputConfig(
                         enhanced_metrics_config=EnhancedMetricsConfig(
                             True,
-                            True,
+                            False,
                             True,
                             True,
                             True,
@@ -63,7 +79,7 @@ async def main(argv):
                             True,
                             True,
                         ))),
-                stored_results=StoredResultsConfig(True, True, True, True),
+                stored_results=StoredResultsConfig(False, False, True, False),
                 metrics=MetricsResultsConfig(True)
             ),
             quality_assurance_processing=True
