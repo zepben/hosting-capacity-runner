@@ -14,5 +14,9 @@
   ],
   "scenarios": [
     "base"
-  ]
+  ],
+  "default_load_watts": [],
+  "default_gen_watts": null,
+  "default_load_var": null,
+  "default_gen_var": null
 }
