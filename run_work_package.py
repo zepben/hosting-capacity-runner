@@ -9,6 +9,7 @@ from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, Result
 from utils import get_client, get_config, print_run, get_config_dir
 
 
+
 async def main(argv):
     config_dir = get_config_dir(argv)
     config = get_config(config_dir)
@@ -39,9 +40,11 @@ async def main(argv):
                     fix_overloading_consumers=True,
                     fix_undersized_service_lines=True,
                     feeder_scenario_allocation_strategy=FeederScenarioAllocationStrategy.ADDITIVE,
-                    closed_loop_v_reg_enabled=False,
+                    closed_loop_v_reg_enabled=True,
                     closed_loop_v_reg_set_point=0.9925,
                     seed=123,
+                    default_load_watts = config["default_load_watts"],
+                    default_load_var = [0.0] * len(config["default_load_watts"])
                 ),
                 solve=SolveConfig(step_size_minutes=30.0),
                 raw_results=RawResultsConfig(True, True, True, True, True)
