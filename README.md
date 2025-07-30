@@ -21,3 +21,10 @@ Run the following to install dependencies.
    ```
 
 The `monitor_progress.py` script can also be used to retrieve and print progress of your work package.
+
+
+### Calibration
+
+Use `run_calibration.py ./config` to launch a calibration workflow.
+
+Use `monitor_calibration_run.py ./config` to monitor the status of a calibration workflow.
