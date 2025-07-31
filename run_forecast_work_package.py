@@ -42,8 +42,8 @@ async def main(argv):
             syf_config=forecast_config,
             generator_config=GeneratorConfig(
                 model=ModelConfig(
-                    vmax_pu=1.2,
-                    vmin_pu=0.8,
+                    load_vmax_pu=1.2,
+                    load_vmin_pu=0.8,
                     p_factor_base_exports=-1,
                     p_factor_base_imports=1,
                     p_factor_forecast_pv=1,
