@@ -37,7 +37,7 @@ async def main(argv):
                 years=[2025],  # Ignored as scenario is base.
                 scenarios=["base"],
                 load_time=FixedTime(
-                    time=datetime.fromisoformat(config["load_time"]["start1"]),
+                    load_time=datetime.fromisoformat(config["load_time"]["start1"]),
                     # Override two loads load profiles.
                     # Note if these load ids don't exist in the feeder, this will have no effect so ensure this is mapped correctly.
                     load_overrides=
@@ -66,7 +66,7 @@ async def main(argv):
                 years=config["forecast_years"],
                 scenarios=config["scenarios"],
                 load_time=FixedTime(
-                    time=datetime.fromisoformat(config["load_time"]["start1"]),
+                    load_time=datetime.fromisoformat(config["load_time"]["start1"]),
                     load_overrides=
                     {"<load_id3>": FixedTimeLoadOverride(
                         # Fixed time load override supports any number of entries, however if an override is supplied it must be the same number of entries
