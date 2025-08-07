@@ -27,4 +27,9 @@ The `monitor_progress.py` script can also be used to retrieve and print progress
 
 Use `run_calibration.py ./config` to launch a calibration workflow.
 
-Use `monitor_calibration_run.py ./config` to monitor the status of a calibration workflow.
+Modify and use `monitor_calibration_run.py ./config` to monitor the status of a calibration workflow.
+
+Use `check_calibration_sets.py ./config` to retrieve the IDs of all calibration results that have been run.
+
+Modify and use `get_calibration_transformer_settings.py ./config` to retrieve the calculated distribution transformer tap settings from the calibration run.
+These settings can then be configured in a hosting capacity work package to apply the tap settings to the models.
