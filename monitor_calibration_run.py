@@ -10,7 +10,7 @@ Get the status of a calibration run.
 Use the ID returned from the server in run_calibration.py
 """
 
-CALIBRATION_ID = "<calibration_id>"  # ID of run to track
+CALIBRATION_ID = "f4de6508-c3e2-4cef-b417-14ca02e167d4"  # ID of run to track
 
 
 async def print_loop(argv):
@@ -19,11 +19,13 @@ async def print_loop(argv):
 
     print("Press Ctrl+C to exit")
     while True:
-        result = await eas_client.async_get_hosting_capacity_calibration_run(id=CALIBRATION_ID)
-        pprint.pprint(result)
+        try:
+            result = await eas_client.async_get_hosting_capacity_calibration_run(id=CALIBRATION_ID)
+            pprint.pprint(result)
+        except Exception as e:
+            print(e)
         await asyncio.sleep(5)
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(print_loop(sys.argv))
+    asyncio.run(print_loop(sys.argv))

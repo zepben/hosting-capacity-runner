@@ -8,9 +8,12 @@ async def main(argv):
     config_dir = get_config_dir(argv)
     eas_client = get_client(config_dir)
     work_package_id = input("Please enter ID of work package to cancel: ")
-    result = await eas_client.async_cancel_hosting_capacity_work_package(work_package_id)
+    try:
+        result = await eas_client.async_cancel_hosting_capacity_work_package(work_package_id)
+        print_cancel(result)
+    except Exception as e:
+        print(e)
 
-    print_cancel(result)
     await eas_client.aclose()
 
 
