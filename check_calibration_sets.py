@@ -5,12 +5,8 @@ import pprint
 from utils import get_client, get_config_dir
 
 """
-Get the sets of a calibration run.
-
-Use the ID returned from the server in run_calibration.py
+Get the IDs of all calibration runs.
 """
-
-CALIBRATION_ID = "<CALIBRATION_ID/NAME>"  # ID of run to fetch calibration sets for
 
 
 async def print_loop(argv):

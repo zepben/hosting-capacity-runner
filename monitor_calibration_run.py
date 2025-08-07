@@ -10,7 +10,7 @@ Get the status of a calibration run.
 Use the ID returned from the server in run_calibration.py
 """
 
-CALIBRATION_ID = "f4de6508-c3e2-4cef-b417-14ca02e167d4"  # ID of run to track
+CALIBRATION_ID = "<CALIBRATION ID/NAME>"  # ID of run to track
 
 
 async def print_loop(argv):
