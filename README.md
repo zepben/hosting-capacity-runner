@@ -33,3 +33,20 @@ Use `check_calibration_sets.py ./config` to retrieve the IDs of all calibration 
 
 Modify and use `get_calibration_transformer_settings.py ./config` to retrieve the calculated distribution transformer tap settings from the calibration run.
 These settings can then be configured in a hosting capacity work package to apply the tap settings to the models.
+
+#### Workflow
+
+A typical calibration workflow is as follows:
+
+```mermaid
+flowchart TD
+  A[Start: Run calibration model study] --> B[Run simulation during low absolute demand period to determine tap positions]
+  B --> C[Define set of tap positions for use in Hosting Capacity Method HCM]
+  C --> D[Prepare for model evaluation across multiple time periods; using above tap position in config]
+  D --> E[Run simulation for one time period]
+  E --> F[Collect outputs: voltages, flows, etc.]
+  F --> G[Evaluate model accuracy]
+  G --> H{More time periods to test?}
+  H -- Yes --> E
+  H -- No --> I[End: Use results to assess model calibration]
+```
