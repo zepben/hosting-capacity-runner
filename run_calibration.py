@@ -16,7 +16,7 @@ Use the returned result with monitor_calibration_run.py to monitor
 async def main(argv):
     config_dir = get_config_dir(argv)
     eas_client = get_client(config_dir)
-    feeder_mrids = ["BH11"]
+    feeder_mrids = ["<FEEDER_MRID>"]
 
     # To do a calibration run with all feeders, populate ewb_server in your auth_config.json file and uncomment the below.
     # This will use the SDK to fetch the network hierarchy and retrieve all the feeder mRIDs.
@@ -26,7 +26,7 @@ async def main(argv):
 
     try:
         result = await eas_client.async_run_hosting_capacity_calibration(
-            calibration_name="test",  # Any name - it will be stored alongside results.
+            calibration_name="<CALIBRATION_ID>",  # Any name - it will be stored alongside results.
             calibration_time_local=datetime(2025, month=7, day=12, hour=4, minute=0),  # The time of the PQV data to model. Note this time must be present in EWBs load database.
             feeders=feeder_mrids    # The feeders to model
         )
