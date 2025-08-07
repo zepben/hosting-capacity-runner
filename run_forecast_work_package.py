@@ -36,57 +36,60 @@ async def main(argv):
         )
     )
 
-    result = await eas_client.async_run_hosting_capacity_work_package(
-        WorkPackageConfig(
-            name=config["work_package_name"],
-            syf_config=forecast_config,
-            generator_config=GeneratorConfig(
-                model=ModelConfig(
-                    load_vmax_pu=1.2,
-                    load_vmin_pu=0.8,
-                    p_factor_base_exports=-1,
-                    p_factor_base_imports=1,
-                    p_factor_forecast_pv=1,
-                    fix_single_phase_loads=False,
-                    max_single_phase_load=15000.0,
-                    max_load_service_line_ratio=1.0,
-                    max_load_lv_line_ratio=2.0,
-                    max_load_tx_ratio=2.0,
-                    max_gen_tx_ratio=4.0,
-                    fix_overloading_consumers=True,
-                    fix_undersized_service_lines=True,
-                    feeder_scenario_allocation_strategy=FeederScenarioAllocationStrategy.ADDITIVE,
-                    closed_loop_v_reg_enabled=False,
-                    closed_loop_v_reg_set_point=0.9925,
-                    seed=123,
+    try:
+        result = await eas_client.async_run_hosting_capacity_work_package(
+            WorkPackageConfig(
+                name=config["work_package_name"],
+                syf_config=forecast_config,
+                generator_config=GeneratorConfig(
+                    model=ModelConfig(
+                        load_vmax_pu=1.2,
+                        load_vmin_pu=0.8,
+                        p_factor_base_exports=-1,
+                        p_factor_base_imports=1,
+                        p_factor_forecast_pv=1,
+                        fix_single_phase_loads=False,
+                        max_single_phase_load=15000.0,
+                        max_load_service_line_ratio=1.0,
+                        max_load_lv_line_ratio=2.0,
+                        max_load_tx_ratio=2.0,
+                        max_gen_tx_ratio=4.0,
+                        fix_overloading_consumers=True,
+                        fix_undersized_service_lines=True,
+                        feeder_scenario_allocation_strategy=FeederScenarioAllocationStrategy.ADDITIVE,
+                        closed_loop_v_reg_enabled=False,
+                        closed_loop_v_reg_set_point=0.9925,
+                        seed=123,
+                    ),
+                    solve=SolveConfig(step_size_minutes=30.0),
+                    raw_results=RawResultsConfig(True, True, True, True, True)
                 ),
-                solve=SolveConfig(step_size_minutes=30.0),
-                raw_results=RawResultsConfig(True, True, True, True, True)
-            ),
 
-            result_processor_config=ResultProcessorConfig(
-                writer_config=WriterConfig(
-                    output_writer_config=WriterOutputConfig(
-                        enhanced_metrics_config=EnhancedMetricsConfig(
-                            True,
-                            False,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                        ))),
-                stored_results=StoredResultsConfig(False, False, True, False),
-                metrics=MetricsResultsConfig(True)
-            ),
-            quality_assurance_processing=True
+                result_processor_config=ResultProcessorConfig(
+                    writer_config=WriterConfig(
+                        output_writer_config=WriterOutputConfig(
+                            enhanced_metrics_config=EnhancedMetricsConfig(
+                                True,
+                                False,
+                                True,
+                                True,
+                                True,
+                                True,
+                                True,
+                                True,
+                                True,
+                                True,
+                            ))),
+                    stored_results=StoredResultsConfig(False, False, True, False),
+                    metrics=MetricsResultsConfig(True)
+                ),
+                quality_assurance_processing=True
+            )
         )
-    )
+        print_run(result)
+    except Exception as e:
+        print(e)
 
-    print_run(result)
     await eas_client.aclose()
 
 

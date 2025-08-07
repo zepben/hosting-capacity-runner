@@ -1,9 +1,12 @@
 import json
-from typing import Dict
+from typing import Dict, List
 
+import grpc.aio
 from zepben.eas.client.eas_client import EasClient
+from zepben.evolve import connect_with_token, SyncNetworkConsumerClient, Feeder, NetworkConsumerClient
 
 import logging
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 logger = logging.getLogger()
 
@@ -64,3 +67,21 @@ def print_progress(result):
     else:
         logger.error("Errors:\n".join(err["message"] for err in result['errors']))
     logger.info("------------------------------")
+
+
+def get_ewb_channel(config_dir) -> grpc.aio.Channel:
+    auth_config = read_json_config(f"{config_dir}/auth_config.json")
+    channel = connect_with_token(
+        host=auth_config["ewb_server"]["host"],
+        rpc_port=auth_config["ewb_server"]["rpc_port"],
+        access_token=auth_config["ewb_server"]["access_token"],
+        ca_filename=auth_config["ewb_server"].get("ca_path", None)
+    )
+    return channel
+
+
+async def fetch_feeders(config_dir) -> List[Feeder]:
+    channel = get_ewb_channel(config_dir)
+    client = NetworkConsumerClient(channel)
+    (await client.get_network_hierarchy()).throw_on_error()
+    return list(client.service.objects(Feeder))
