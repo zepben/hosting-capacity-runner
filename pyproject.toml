@@ -1,0 +1,50 @@
+#  Copyright 2025 Zeppelin Bend Pty Ltd
+#
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+    "build>=1.2.0"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zepben.hosting-capacity-runner"
+version = "0.0.1b1"
+description = "Python client to issue commands to hosting capacity work package"
+readme = {file = "README.md", content-type = "test/markdown"}
+license = "MPL-2.0"
+requires-python = '>=3.10'
+authors = [
+    {name = "Roberto Marquez", email = "roberto.marquez@zepben.com"},
+    {name = "Max Chesterfield", email = "max.chesterfield@zepben.com"}
+]
+dependencies = [
+    "zepben.evolve==0.48.0",
+    "zepben.eas==0.23.0b1",
+    "click==8.2.1",
+    "pyyaml==6.0.2",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent"
+]
+
+[project.urls]
+Repository = "https://github.com/zepben/hosting-capacity-runner"
+Homepage = "https://zepben.com"
+
+[project.scripts]
+hcr = "zepben.hosting_capacity_runner.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["src/"]
+

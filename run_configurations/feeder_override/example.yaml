@@ -1,0 +1,99 @@
+
+syf_config:
+  configs:
+    # This configuration will run FEEDER_MRID_1 using the base (as built) model for a single timestep (time), while overriding the load for two specific
+    # load IDs on that feeder.
+    #
+    # In practice these load_ids will be connection point identifiers and to understand what IDs you need # to use you will need to have an
+    # understanding of how load data is keyed in your deployment. Contact your EWB HCM administrator if you have questions on how to configure this
+    # for your environment.
+    - feeder: "<FEEDER_MRID_1>"
+      years:
+        - 2025  # Ignored as scenario is base.
+      scenarios:
+        - "base"
+      load_time:
+        load_time: 2023-02-22T00:00:00.00Z
+        # Override two loads load profiles.
+        # Note if these load ids don't exist in the feeder, this will have no effect so ensure this is mapped correctly.
+        load_overrides:
+          "<load_id1>":
+            load_watts: [5000.0]
+            load_var: [50.0]
+            gen_var: None
+            gen_watts: None
+          "<load_id2>":
+            load_watts: [5000.0]
+            load_var: [50.0]
+            gen_var: None
+            gen_watts: None
+
+    # This will cause FEEDER_MRID_2 to run, similar to above however with the override being applied to load_id3 being multiple timesteps.
+    # This allows you to step-change the load for a single profile while keeping the rest of the load for the feeder consistent. A typical
+    # scenario would be to ramp up the load on one customer on a feeder to see all these results in one work package.
+    - feeder: "<FEEDER_MRID_2>"
+      years:
+        - 2024
+      scenarios:
+        - base
+      load_time:
+        load_time: 2023-02-22T00:00:00.00Z
+        load_overrides:
+          "<load_id3>":
+            # Fixed time load override supports any number of entries, however if an override is supplied it must be the same number of entries
+            # for all. In the below example, every list supplied must have exactly 3 entries.
+            load_watts: [10000.0, 20000.0, 30000.0]
+            load_var: [20.0. 100.0. 150.0]
+            gen_var: None
+            gen_watts: None
+
+generator_config:
+  model:
+    load_vmax_pu: 1.2
+    load_vmin_pu: 0.8
+    p_factor_base_exports: -1
+    p_factor_base_imports: 1
+    p_factor_forecast_pv: 1
+    fix_single_phase_loads: False
+    max_single_phase_load: 15000.0
+    max_load_service_line_ratio: 1.0
+    max_load_lv_line_ratio: 2.0
+    max_load_tx_ratio: 2.0
+    max_gen_tx_ratio: 4.0
+    fix_overloading_consumers: True
+    fix_undersized_service_lines: True
+    feeder_scenario_allocation_strategy: FeederScenarioAllocationStrategy.ADDITIVE
+    closed_loop_v_reg_enabled: False
+    closed_loop_v_reg_set_point: 0.9925
+    seed: 123
+  solve:
+    step_size_minutes: 30.0
+  raw_results:
+    energy_meter_voltages_raw: True
+    energy_meters_raw: True
+    results_per_meter: True
+    overloads_raw: True
+    voltage_exceptions_raw: True
+
+result_processor_config:
+  writer_config:
+    output_writer_config:
+      enhanced_metrics_config:
+        populate_enhanced_metrics: True
+        populate_enhanced_metrics_profile: True
+        populate_duration_curves: True
+        populate_constraints: True
+        populate_weekly_reports: True
+        calculate_normal_for_load_thermal: True
+        calculate_emerg_for_load_thermal: True
+        calculate_normal_for_gen_thermal: True
+        calculate_emerg_for_gen_thermal: True
+        calculate_co2: True
+  stored_results:
+    energy_meter_voltages_raw: False
+    energy_meters_raw: False
+    overloads_raw: True
+    voltage_exceptions_raw: False
+  metrics:
+    calculate_performance_metrics: True
+quality_assurance_processing: True
