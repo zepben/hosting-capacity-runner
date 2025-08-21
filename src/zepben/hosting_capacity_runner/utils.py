@@ -1,9 +1,11 @@
+import asyncio
 import json
 from typing import Dict, List
 
 import grpc.aio
+from zepben.eas import TokenAuth
 from zepben.eas.client.eas_client import EasClient
-from zepben.evolve import connect_with_token, SyncNetworkConsumerClient, Feeder, NetworkConsumerClient
+from zepben.evolve import connect_with_token, Feeder, NetworkConsumerClient
 
 import logging
 
@@ -26,14 +28,17 @@ def get_config(config_dir):
 def get_client(config_dir):
     auth_config = read_json_config(f"{config_dir}/auth_config.json")
 
-    return EasClient(
-        host=auth_config["eas_server"]["host"],
-        port=auth_config["eas_server"]["port"],
-        protocol=auth_config["eas_server"]["protocol"],
-        access_token=auth_config["eas_server"]["access_token"],
-        verify_certificate=auth_config["eas_server"].get("verify_certificate", True),
+    with EasClient(
+        TokenAuth(
+            host=auth_config["eas_server"]["host"],
+            port=auth_config["eas_server"]["port"],
+            protocol=auth_config["eas_server"]["protocol"],
+            access_token=auth_config["eas_server"]["access_token"],
+            verify_certificate=auth_config["eas_server"].get("verify_certificate", True),
+        ),
         ca_filename=auth_config["eas_server"].get("ca_filename")
-    )
+    ) as client:
+        return client
 
 
 def read_json_config(config_file_path: str) -> Dict:
@@ -85,3 +90,8 @@ async def fetch_feeders(config_dir) -> List[Feeder]:
     client = NetworkConsumerClient(channel)
     (await client.get_network_hierarchy()).throw_on_error()
     return list(client.service.objects(Feeder))
+
+
+def run_async(func):
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(func())

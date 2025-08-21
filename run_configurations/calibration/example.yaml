@@ -1,0 +1,25 @@
+calibration_name: "<CALIBRATION_ID>"  # Any name - it will be stored alongside results.
+calibration_time_local: 2025-07-12T04:00:00  # The time of the PQV data to model. Note this time must be present in EWBs load database.
+feeders:  # The feeders to model
+  - Feeder Mrid
+  - Another Feeder Mrid
+# transformer_tap_settings="<PREVIOUS_CALIBRATION_ID>", # The name of a set of previously generated tap settings that are to be applied before running the calibration work package.
+generator_config:   # A customized GeneratorConfig can be passed to the calibration run.
+    model:
+        load_vmax_pu: 1.2
+        load_vmin_pu: 0.8
+        p_factor_base_exports: -1
+        p_factor_base_imports: 1
+        p_factor_forecast_pv: 1
+        fix_single_phase_loads: False
+        max_single_phase_load: 15000.0
+        max_load_service_line_ratio: 1.0
+        max_load_lv_line_ratio: 2.0
+        max_load_tx_ratio: 2.0
+        max_gen_tx_ratio: 4.0
+        fix_overloading_consumers: True
+        fix_undersized_service_lines: True
+        feeder_scenario_allocation_strategy: FeederScenarioAllocationStrategy.ADDITIVE
+        closed_loop_v_reg_enabled: False
+        closed_loop_v_reg_set_point: 0.9925
+        seed: 123

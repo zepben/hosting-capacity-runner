@@ -1,0 +1,4 @@
+*.pyc
+.idea
+build/*
+src/zepben.hosting_capacity_runner.egg-info/

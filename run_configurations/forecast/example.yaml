@@ -1,0 +1,67 @@
+# Forecast Config example set up
+# This can be set up through the config file or by hard coding in the variables below.
+# The below will run a forecast-based work package for the configured feeders, years, and scenarios, over the time period specified in load_time below.
+# Note load_time reflects the base year (historical) load, and must be correctly specified to be a period of load data that exists in your system.
+# Consult your EWB HCM administrator if you do not know what load is available in your environment.
+
+syf_config:
+  feeders:
+    - Feeder Mrid
+    - Another Feeder Mrid
+  years:
+    - 2024
+  scenarios:
+    - base
+  load_time:
+    start_time: 2023-02-22T00:00:00.00Z
+    end_time: 2024-02-22T00:00:00.00Z
+generator_config:
+  model:
+    load_vmax_pu: 1.2
+    load_vmin_pu: 0.8
+    p_factor_base_exports: -1
+    p_factor_base_imports: 1
+    p_factor_forecast_pv: 1
+    fix_single_phase_loads: False
+    max_single_phase_load: 15000.0
+    max_load_service_line_ratio: 1.0
+    max_load_lv_line_ratio: 2.0
+    max_load_tx_ratio: 2.0
+    max_gen_tx_ratio: 4.0
+    fix_overloading_consumers: True
+    fix_undersized_service_lines: True
+    feeder_scenario_allocation_strategy: FeederScenarioAllocationStrategy.ADDITIVE
+    closed_loop_v_reg_enabled: False
+    closed_loop_v_reg_set_point: 0.9925
+    seed: 123
+  solve:
+    step_size_minutes: 30.0
+  raw_results:
+    energy_meter_voltages_raw: True
+    energy_meters_raw: True
+    results_per_meter: True
+    overloads_raw: True
+    voltage_exceptions_raw: True
+
+result_processor_config:
+  writer_config:
+    output_writer_config:
+      enhanced_metrics_config:
+        populate_enhanced_metrics: True
+        populate_enhanced_metrics_profile: True
+        populate_duration_curves: True
+        populate_constraints: True
+        populate_weekly_reports: True
+        calculate_normal_for_load_thermal: True
+        calculate_emerg_for_load_thermal: True
+        calculate_normal_for_gen_thermal: True
+        calculate_emerg_for_gen_thermal: True
+        calculate_co2: True
+  stored_results:
+    energy_meter_voltages_raw: False
+    energy_meters_raw: False
+    overloads_raw: True
+    voltage_exceptions_raw: False
+  metrics:
+    calculate_performance_metrics: True
+quality_assurance_processing: True
