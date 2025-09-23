@@ -1,0 +1,99 @@
+from zepben.eas import InterventionConfig, YearRange, InterventionClass, CandidateGenerationConfig
+from zepben.eas.client.work_package import PhaseRebalanceProportions, CandidateGenerationType
+
+# TARIFF_REFORM: Modifies shapes of customer loads.
+#                Each load reshape criteria (in the input DB) corresponds to a sequence of load reshape strategies.
+#                Each load reshape strategy has:
+#                 - A set of criteria for the customers to apply the strategy to e.g. has_ev (boolean), year (int)
+#                 - A percentage used to select a portion of the applicable customers
+#                 - A load reshape instance, which is basically an additive or multiplicative profile to apply
+#                   - IIRC, load reshape instances can have profiles a single number long to denote flat application
+#                     e.g. [0.5] multiplicative means halve the load, and 48 numbers mean a profile that repeats daily.
+InterventionConfig(
+    # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
+    base_work_package_id="550e8400-e29b-41d4-a716-446655440000",
+    year_range=YearRange(2026, 2030),  # no effect, but should be set to range of years base WP solved for
+    allocation_limit_per_year=0,  # allocation_limit_per_year has no effect. Should probably default to 0
+    intervention_type=InterventionClass.TARIFF_REFORM,
+    candidate_generation=None,  # PRRP not needed for tariff reform
+    allocation_criteria="load_reshape_strategy_1"  # corresponds to load_reshape_strategies.criteria_name in input DB
+    # specific_allocation_instance has no effect
+    # phase_rebalance_proportions has no effect
+    # dvms has no effect
+)
+
+# CONTROLLED_LOAD_HOT_WATER: Exactly the same as tariff reform, just under a different name. The umbrella term used
+#                            internally to describe both is "load reshaping".
+InterventionConfig(
+    # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
+    base_work_package_id="550e8400-e29b-41d4-a716-446655440001",
+    year_range=YearRange(2026, 2030),  # no effect, but should be set to range of years base WP solved for
+    allocation_limit_per_year=0,  # allocation_limit_per_year has no effect. Should probably default to 0
+    intervention_type=InterventionClass.CONTROLLED_LOAD_HOT_WATER,
+    candidate_generation=None,  # PRRP not needed for CLHW
+    allocation_criteria="load_reshape_strategy_2"  # corresponds to load_reshape_strategies.criteria_name in input DB
+    # specific_allocation_instance has no effect
+    # phase_rebalance_proportions has no effect
+    # dvms has no effect
+)
+
+# CONTROLLED_LOAD_HOT_WATER
+
+# COMMUNITY_BESS: Adds batteries on LV networks to offset high load/generation. Candidates are ranked by
+#                 the sum of gen_exceeding_normal_voltage_cecv + load_exceeding_normal_thermal_voltage_vcr across
+#                 the years they each apply.
+InterventionConfig(
+    # base_work_package_id is used by PRRP to query enhanced metrics in the input database
+    base_work_package_id="550e8400-e29b-41d4-a716-446655440003",
+    year_range=YearRange(
+        min_year=2026,  # The earliest year to find and apply intervention candidates for
+        max_year=2030   # The latest year to find and apply intervention candidates for
+    ),
+    allocation_limit_per_year=100,  # maximum number of batteries to install per year
+    intervention_type=InterventionClass.COMMUNITY_BESS,
+    candidate_generation=CandidateGenerationConfig(
+        type=CandidateGenerationType.CRITERIA,  # expected for COMMUNITY_BESS
+
+        # corresponds to intervention_candidate_criteria.name in input DB. Each entry has a suite of optional thresholds
+        # e.g. min_voltage_outsite_limits_hours. If all thresholds are exceeded for a year at a measurement zone, it is
+        # marked as a candidate for the earliest year that measurement zone breaks the threshold.
+        intervention_criteria_name="threshold_set_1"
+    ),
+    allocation_criteria="bess_allocation_criteria_1",  # corresponds to bess_allocation_criteria.name in input DB.
+    specific_allocation_instance="bess_instance_1",  # Optional, corresponds to bess_instances.name in input DB.
+                                                     # If this is set, this is the only instance (type) of battery
+                                                     # to apply to the model. Otherwise, the smallest viable battery
+                                                     # will be allocated in each case.
+    # phase_rebalance_proportions has no effect
+    # dvms has no effect
+)
+
+# DISTRIBUTION_TX_OLTC
+
+# LV_STATCOMS
+
+# DVMS
+
+# PHASE_REBALANCING: Redistributes single-phase customers across A/B/C phases in the specified proportions.
+#                    This should be applied on networks we know to already have an uneven distribution of single-phase
+#                    customers across the three phases, which should be modelled in the base network in EWB.
+InterventionConfig(
+    # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
+    base_work_package_id="550e8400-e29b-41d4-a716-446655440007",
+    year_range=YearRange(2026, 2030),  # no effect, but should be set to range of years base WP solved for
+    allocation_limit_per_year=0,  # allocation_limit_per_year has no effect. Should probably default to 0
+    intervention_type=InterventionClass.PHASE_REBALANCING,
+    candidate_generation=None,  # PRRP not needed for phase rebalancing
+    # allocation_criteria has no effect
+    # specific_allocation_instance has no effect
+    phase_rebalance_proportions=PhaseRebalanceProportions(
+        # proportions used to reallocate single-phase customers. This does not have to sum to 1, but the sum should be
+        # positive and none of the values should be negative. For an even distribution, use values 1, 1, 1.
+        a=0.25,
+        b=0.35,
+        c=0.4
+    )
+    # dvms has no effect
+)
+
+# DISTRIBUTION_TAP_OPTIMIZATION
