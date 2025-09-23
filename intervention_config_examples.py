@@ -37,14 +37,12 @@ InterventionConfig(
     # dvms has no effect
 )
 
-# CONTROLLED_LOAD_HOT_WATER
-
 # COMMUNITY_BESS: Adds batteries on LV networks to offset high load/generation. Candidates are ranked by
 #                 the sum of gen_exceeding_normal_voltage_cecv + load_exceeding_normal_thermal_voltage_vcr across
 #                 the years they each apply.
 InterventionConfig(
     # base_work_package_id is used by PRRP to query enhanced metrics in the input database
-    base_work_package_id="550e8400-e29b-41d4-a716-446655440003",
+    base_work_package_id="550e8400-e29b-41d4-a716-446655440002",
     year_range=YearRange(
         min_year=2026,  # The earliest year to find and apply intervention candidates for
         max_year=2030   # The latest year to find and apply intervention candidates for
@@ -79,7 +77,7 @@ InterventionConfig(
 #                    customers across the three phases, which should be modelled in the base network in EWB.
 InterventionConfig(
     # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
-    base_work_package_id="550e8400-e29b-41d4-a716-446655440007",
+    base_work_package_id="550e8400-e29b-41d4-a716-446655440006",
     year_range=YearRange(2026, 2030),  # no effect, but should be set to range of years base WP solved for
     allocation_limit_per_year=0,  # allocation_limit_per_year has no effect. Should probably default to 0
     intervention_type=InterventionClass.PHASE_REBALANCING,
