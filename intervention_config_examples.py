@@ -72,7 +72,9 @@ InterventionConfig(
 # LV_STATCOMS
 
 # DVMS: Done while solving OpenDSS model. Distribution transformers' taps will adjust based on the voltages at the
-#       downstream customers (multiple reading points per TX).
+#       downstream customers (multiple reading points per TX). This is done at each time step when solving--DVMS
+#       requires the solver to execute in a special mode where the model is solved 1 time step at a time in order to
+#       get the voltages needed to adjust each tap. This is the most involved of all the interventions.
 InterventionConfig(
     # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
     base_work_package_id="550e8400-e29b-41d4-a716-446655440005",
@@ -84,15 +86,30 @@ InterventionConfig(
     # specific_allocation_instance has no effect
     # phase_rebalance_proportions has no effect
     dvms=DvmsConfig(
+        # The DVMS logic aims to adjust taps such that customers within the given percentile range have p.u. voltages
+        # within the [lower_limit, upper_limit] range. In this example config, the customers from the 5th to the 95th
+        # percentile in voltages should have voltages within 0.9-1.1 p.u.
         lower_limit=0.9,
         upper_limit=1.1,
         lower_percentile=5,
         upper_percentile=95,
+
+        # The maximum attempts to adjust taps per time step to meet the above requirements
         max_iterations=3,
+
+        # Configures simulated voltage regulator that is responsible for fulfilling the above requirements.
+        # Note that the above requirements control acceptance (whether to move on to the next time step), whereas
+        # these parameters configure the actual logic used to determine tap position changes.
         regulator_config=RegulatorConfig(
             pu_target=1.0,
-            pu_deadband_percent=4,
+            # interpreted as the whole width of the deadband in % of the target, so the deadband is 0.94-1.06 p.u. here.
+            pu_deadband_percent=12,
             max_tap_change_per_step=2,
+            # if True, tap changes will be made if they sufficiently improve one side of the customer voltage
+            # distribution, even if they worsen the other. For example, suppose a +2 tap change is sufficient to reduce
+            # the percentage of customers below 0.9 p.u. voltage to under 5 percent. Even if the percentage of customers
+            # that are above 1.1 p.u. voltage increases to 20 percent, the tap change will be attempted (acceptance
+            # criteria is still checked for the number of iterations specified above).
             allow_push_to_limit=True
         )
     )
@@ -120,4 +137,4 @@ InterventionConfig(
     # dvms has no effect
 )
 
-# DISTRIBUTION_TAP_OPTIMIZATION
+# DISTRIBUTION_TAP_OPTIMIZATION:
