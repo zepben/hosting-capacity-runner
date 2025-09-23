@@ -1,4 +1,5 @@
-from zepben.eas import InterventionConfig, YearRange, InterventionClass, CandidateGenerationConfig
+from zepben.eas import InterventionConfig, YearRange, InterventionClass, CandidateGenerationConfig, DvmsConfig, \
+    RegulatorConfig
 from zepben.eas.client.work_package import PhaseRebalanceProportions, CandidateGenerationType
 
 # TARIFF_REFORM: Modifies shapes of customer loads.
@@ -70,7 +71,32 @@ InterventionConfig(
 
 # LV_STATCOMS
 
-# DVMS
+# DVMS: Done while solving OpenDSS model. Distribution transformers' taps will adjust based on the voltages at the
+#       downstream customers (multiple reading points per TX).
+InterventionConfig(
+    # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
+    base_work_package_id="550e8400-e29b-41d4-a716-446655440005",
+    year_range=YearRange(2026, 2030),  # no effect, but should be set to range of years base WP solved for
+    allocation_limit_per_year=0,  # allocation_limit_per_year has no effect. Should probably default to 0
+    intervention_type=InterventionClass.DVMS,
+    candidate_generation=None,  # PRRP not needed for DVMS
+    # allocation_criteria has no effect
+    # specific_allocation_instance has no effect
+    # phase_rebalance_proportions has no effect
+    dvms=DvmsConfig(
+        lower_limit=0.9,
+        upper_limit=1.1,
+        lower_percentile=5,
+        upper_percentile=95,
+        max_iterations=3,
+        regulator_config=RegulatorConfig(
+            pu_target=1.0,
+            pu_deadband_percent=4,
+            max_tap_change_per_step=2,
+            allow_push_to_limit=True
+        )
+    )
+)
 
 # PHASE_REBALANCING: Redistributes single-phase customers across A/B/C phases in the specified proportions.
 #                    This should be applied on networks we know to already have an uneven distribution of single-phase
