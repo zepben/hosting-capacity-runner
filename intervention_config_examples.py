@@ -71,11 +71,37 @@ InterventionConfig(
     # dvms has no effect
 )
 
-# DISTRIBUTION_TX_OLTC
+# DISTRIBUTION_TX_OLTC: Installs on-load tap changers at distribution transformers. In OpenDSS, This is modelled as
+#                       adding TapChangerControls to existing distribution transformers with ratio tap changers.
+InterventionConfig(
+    # base_work_package_id is used by PRRP to query enhanced metrics in the input database
+    base_work_package_id="550e8400-e29b-41d4-a716-446655440003",
+    year_range=YearRange(
+        min_year=2026,  # The earliest year to find and apply intervention candidates for
+        max_year=2030  # The latest year to find and apply intervention candidates for
+    ),
+    allocation_limit_per_year=50,  # maximum number of on-load tap changers to install per year
+    intervention_type=InterventionClass.DISTRIBUTION_TX_OLTC,
+    candidate_generation=CandidateGenerationConfig(
+        type=CandidateGenerationType.CRITERIA,  # expected for DISTRIBUTION_TX_OLTC
 
-# LV_STATCOMS: Adds STATCOMs on the LV networks to compensate for reactive excess. This is modelled as PVSystems
-#              that are controlled by a single InvControl whose characteristics (e.g. I-V curve) determined by the
-#              LV STATCOM instance found in the input DB.
+        # corresponds to intervention_candidate_criteria.name in input DB. Each entry has a suite of optional thresholds
+        # e.g. min_voltage_outsite_limits_hours. If all thresholds are exceeded for a year at a measurement zone, it is
+        # marked as a candidate for the earliest year that measurement zone breaks the threshold.
+        intervention_criteria_name="threshold_set_2"
+    ),
+    # corresponds to distribution_transformer_oltc_allocation_criteria.name in input DB.
+    allocation_criteria="distribution_transformer_oltc_allocation_criteria_1",
+    # Optional, corresponds to distribution_transformer_oltc_instances.name in input DB. If this is set, this is the
+    # only instance (type) of OLTC to apply to the model. Otherwise, an arbitrary OLTC will be allocated in each case.
+    specific_allocation_instance="distribution_transformer_oltc_instance_1",
+    # phase_rebalance_proportions has no effect
+    # dvms has no effect
+)
+
+# LV_STATCOMS: Adds STATCOMs on the LV networks to compensate for reactive excess. In OpenDSS, this is modelled as
+#              multiple PVSystems that are controlled by a single InvControl whose characteristics (e.g. I-V curve)
+#              determined by the LV STATCOM instance found in the input DB.
 InterventionConfig(
     # base_work_package_id is used by PRRP to query enhanced metrics in the input database
     base_work_package_id="550e8400-e29b-41d4-a716-446655440004",
@@ -91,7 +117,7 @@ InterventionConfig(
         # corresponds to intervention_candidate_criteria.name in input DB. Each entry has a suite of optional thresholds
         # e.g. min_voltage_outsite_limits_hours. If all thresholds are exceeded for a year at a measurement zone, it is
         # marked as a candidate for the earliest year that measurement zone breaks the threshold.
-        intervention_criteria_name="threshold_set_2"
+        intervention_criteria_name="threshold_set_3"
     ),
     # corresponds to lv_statcom_allocation_criteria.name in input DB.
     allocation_criteria="lv_statcom_allocation_criteria_1",
