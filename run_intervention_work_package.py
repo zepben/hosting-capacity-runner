@@ -87,6 +87,7 @@ async def main(argv):
     try:
         # ==== IF STARTING FROM SCRATCH ====
         # start base work package
+        print(f"Sending base work package with config: {base_work_package_config}")
         result = await eas_client.async_run_hosting_capacity_work_package(base_work_package_config)
         print_run(result)
         if "data" not in result:
@@ -130,6 +131,7 @@ async def main(argv):
         )
         intervention_work_package_config = copy.copy(base_work_package_config)  # shallow copy
         intervention_work_package_config.intervention = intervention_config
+        print(f"Sending intervention work package with config: {intervention_work_package_config}")
         result = await eas_client.async_run_hosting_capacity_work_package(intervention_work_package_config)
         print_run(result)
 
