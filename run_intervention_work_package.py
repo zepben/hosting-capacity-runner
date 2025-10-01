@@ -108,7 +108,7 @@ async def main(argv):
 
         # start intervention work package
         intervention_config = InterventionConfig(
-            base_work_package_id="550e8400-e29b-41d4-a716-446655440002",
+            base_work_package_id=base_work_package_id,
             year_range=YearRange(
                 min_year=2026,
                 max_year=2030
