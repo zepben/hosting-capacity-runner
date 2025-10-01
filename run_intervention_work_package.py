@@ -1,6 +1,7 @@
 import asyncio
+import copy
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from zepben.eas import ForecastConfig
 from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
@@ -84,6 +85,7 @@ async def main(argv):
     )
 
     try:
+        # ==== IF STARTING FROM SCRATCH ====
         # start base work package
         result = await eas_client.async_run_hosting_capacity_work_package(base_work_package_config)
         print_run(result)
@@ -106,6 +108,10 @@ async def main(argv):
                 break
             await asyncio.sleep(5)
 
+        # ==== ELSE ====
+        # base_work_package_id = "ID-OF-PREVIOUSLY-RAN-WORK-PACKAGE"
+        # ==== END ====
+
         # start intervention work package
         intervention_config = InterventionConfig(
             base_work_package_id=base_work_package_id,
@@ -122,7 +128,7 @@ async def main(argv):
             allocation_criteria="bess_allocation_criteria_1",
             specific_allocation_instance="bess_instance_1"
         )
-        intervention_work_package_config = base_work_package_config.copy()
+        intervention_work_package_config = copy.copy(base_work_package_config)  # shallow copy
         intervention_work_package_config.intervention = intervention_config
         result = await eas_client.async_run_hosting_capacity_work_package(intervention_work_package_config)
         print_run(result)
