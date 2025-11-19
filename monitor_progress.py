@@ -17,7 +17,7 @@ async def print_loop(argv):
             print_progress(result)
         except Exception as e:
             print(e)
-        await asyncio.sleep(5)
+        await asyncio.sleep(10)
     await eas_client.aclose()
 
 
