@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import grpc.aio
 from zepben.eas.client.eas_client import EasClient
-from zepben.evolve import connect_with_token, SyncNetworkConsumerClient, Feeder, NetworkConsumerClient
+from zepben.ewb import connect_with_token, SyncNetworkConsumerClient, Feeder, NetworkConsumerClient
 
 import logging
 
