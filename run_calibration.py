@@ -2,7 +2,8 @@ import asyncio
 import sys
 from datetime import datetime
 
-from zepben.eas import GeneratorConfig, ModelConfig, FeederScenarioAllocationStrategy
+from zepben.eas import HcFeederScenarioAllocationStrategy, HcGeneratorConfigInput, \
+    HcModelConfigInput, Mutation
 
 from utils import get_client, get_config_dir, fetch_feeders
 
@@ -26,40 +27,43 @@ async def main(argv):
     # feeders = await fetch_feeders(config_dir)
     # feeder_mrids = [f.mrid for f in feeders[:10]]   # Take only first 10 feeders to avoid running too many.
 
-    # When providing a GeneratorConfig the following fields will be ignored or overridden during a calibration run:
-    # GeneratorConfig.model.calibration
-    # GeneratorConfig.model.meter_placement_config
-    # GeneratorConfig.solve.step_size_minutes
-    # GeneratorConfig.raw_results.
+    # When providing a HcGeneratorConfigInput the following fields will be ignored or overridden during a calibration run:
+    #   .model.calibration
+    #   .model.meter_placement_config
+    #   .solve.step_size_minutes
+    #   .raw_results.
 
     # If transformer_tap_settings provided directly to async_run_hosting_capacity_calibration(), it will take
     # precedence over any 'transformer_tap_settings' supplied inside the generator_config parameter
 
     try:
-        result = await eas_client.async_run_hosting_capacity_calibration(
-            calibration_name="<CALIBRATION_ID>",  # Any name - it will be stored alongside results.
-            calibration_time_local=datetime(2025, month=7, day=12, hour=4, minute=0),  # The time of the PQV data to model. Note this time must be present in EWBs load database.
-            feeders=feeder_mrids,    # The feeders to model
-            # transformer_tap_settings="<PREVIOUS_CALIBRATION_ID>", # The name of a set of previously generated tap settings that are to be applied before running the calibration work package.
-            generator_config=GeneratorConfig(  # A customized GeneratorConfig can be passed to the calibration run.
-                model=ModelConfig(
-                    load_vmax_pu=1.2,
-                    load_vmin_pu=0.8,
-                    p_factor_base_exports=-1,
-                    p_factor_base_imports=1,
-                    p_factor_forecast_pv=1,
-                    fix_single_phase_loads=False,
-                    max_single_phase_load=15000.0,
-                    max_load_service_line_ratio=1.0,
-                    max_load_lv_line_ratio=2.0,
-                    max_load_tx_ratio=2.0,
-                    max_gen_tx_ratio=4.0,
-                    fix_overloading_consumers=True,
-                    fix_undersized_service_lines=True,
-                    feeder_scenario_allocation_strategy=FeederScenarioAllocationStrategy.ADDITIVE,
-                    closed_loop_v_reg_enabled=False,
-                    closed_loop_v_reg_set_point=0.9925,
-                    seed=123,
+        result = await eas_client.mutation(
+            Mutation.run_calibration(
+                calibration_name="<CALIBRATION_ID>",  # Any name - it will be stored alongside results.
+                calibration_time_local=datetime(2025, month=7, day=12, hour=4, minute=0),
+                # The time of the PQV data to model. Note this time must be present in EWBs load database.
+                feeders=feeder_mrids,  # The feeders to model
+                generator_config=HcGeneratorConfigInput(
+                    # A customized GeneratorConfig can be passed to the calibration run.
+                    model=HcModelConfigInput(
+                        load_vmax_pu=1.2,
+                        load_vmin_pu=0.8,
+                        p_factor_base_exports=-1,
+                        p_factor_base_imports=1,
+                        p_factor_forecast_pv=1,
+                        fix_single_phase_loads=False,
+                        max_single_phase_load=15000.0,
+                        max_load_service_line_ratio=1.0,
+                        max_load_lv_line_ratio=2.0,
+                        max_load_tx_ratio=2.0,
+                        max_gen_tx_ratio=4.0,
+                        fix_overloading_consumers=True,
+                        fix_undersized_service_lines=True,
+                        feeder_scenario_allocation_strategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
+                        closed_loop_v_reg_enabled=False,
+                        closed_loop_v_reg_set_point=0.9925,
+                        seed=123,
+                    )
                 )
             )
         )
@@ -67,7 +71,7 @@ async def main(argv):
     except Exception as e:
         print(e)
 
-    await eas_client.aclose()
+    await eas_client.close()
 
 
 if __name__ == "__main__":

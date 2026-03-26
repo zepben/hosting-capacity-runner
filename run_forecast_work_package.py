@@ -2,10 +2,10 @@ import asyncio
 import sys
 from datetime import datetime
 
-from zepben.eas import ForecastConfig
-from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
-    MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig
+from zepben.eas import ForecastConfigInput, TimePeriodInput, Mutation, WorkPackageInput, HcGeneratorConfigInput, \
+    HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, HcRawResultsConfigInput, \
+    HcResultProcessorConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, \
+    HcStoredResultsConfigInput, HcMetricsResultsConfigInput
 
 from utils import get_client, get_config, print_run, get_config_dir
 
@@ -26,23 +26,22 @@ async def main(argv):
     # The below will run a forecast-based work package for the configured feeders, years, and scenarios, over the time period specified in load_time below.
     # Note load_time reflects the base year (historical) load, and must be correctly specified to be a period of load data that exists in your system.
     # Consult your EWB HCM administrator if you do not know what load is available in your environment.
-    forecast_config = ForecastConfig(
+    forecast_config = ForecastConfigInput(
         feeders=config["feeders"],
         years=config["forecast_years"],
         scenarios=config["scenarios"],
-        load_time=TimePeriod(
+        load_time=TimePeriodInput(
             start_time=datetime.fromisoformat(config["load_time"]["start1"]),
             end_time=datetime.fromisoformat(config["load_time"]["end1"]),
         )
     )
 
     try:
-        result = await eas_client.async_run_hosting_capacity_work_package(
-            WorkPackageConfig(
-                name=config["work_package_name"],
+        result = await eas_client.mutation(Mutation.run_work_package(
+            WorkPackageInput(
                 syf_config=forecast_config,
-                generator_config=GeneratorConfig(
-                    model=ModelConfig(
+                generator_config=HcGeneratorConfigInput(
+                    model=HcModelConfigInput(
                         load_vmax_pu=1.2,
                         load_vmin_pu=0.8,
                         p_factor_base_exports=-1,
@@ -56,19 +55,19 @@ async def main(argv):
                         max_gen_tx_ratio=4.0,
                         fix_overloading_consumers=True,
                         fix_undersized_service_lines=True,
-                        feeder_scenario_allocation_strategy=FeederScenarioAllocationStrategy.ADDITIVE,
+                        feeder_scenario_allocation_strategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
                         closed_loop_v_reg_enabled=False,
                         closed_loop_v_reg_set_point=0.9925,
                         seed=123,
                     ),
-                    solve=SolveConfig(step_size_minutes=30.0),
-                    raw_results=RawResultsConfig(True, True, True, True, True)
+                    solve=HcSolveConfigInput(step_size_minutes=30.0),
+                    raw_results=HcRawResultsConfigInput(True, True, True, True, True)
                 ),
 
-                result_processor_config=ResultProcessorConfig(
-                    writer_config=WriterConfig(
-                        output_writer_config=WriterOutputConfig(
-                            enhanced_metrics_config=EnhancedMetricsConfig(
+                result_processor_config=HcResultProcessorConfigInput(
+                    writer_config=HcWriterConfigInput(
+                        output_writer_config=HcWriterOutputConfigInput(
+                            enhanced_metrics_config=HcEnhancedMetricsConfigInput(
                                 True,
                                 False,
                                 True,
@@ -80,17 +79,18 @@ async def main(argv):
                                 True,
                                 True,
                             ))),
-                    stored_results=StoredResultsConfig(False, False, True, False),
-                    metrics=MetricsResultsConfig(True)
+                    stored_results=HcStoredResultsConfigInput(False, False, True, False),
+                    metrics=HcMetricsResultsConfigInput(True)
                 ),
                 quality_assurance_processing=True
-            )
-        )
+            ),
+            work_package_name=config["work_package_name"],
+        ))
         print_run(result)
     except Exception as e:
         print(e)
 
-    await eas_client.aclose()
+    await eas_client.close()
 
 
 if __name__ == "__main__":

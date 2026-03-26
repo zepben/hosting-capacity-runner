@@ -3,6 +3,7 @@ import sys
 import pprint
 
 from utils import get_client, get_config_dir
+from zepben.eas import Query
 
 """
 Get the status of a calibration run.
@@ -20,7 +21,7 @@ async def print_loop(argv):
     print("Press Ctrl+C to exit")
     while True:
         try:
-            result = await eas_client.async_get_hosting_capacity_calibration_run(id=CALIBRATION_ID)
+            result = await eas_client.query(Query.get_calibration_run(id=CALIBRATION_ID))
             pprint.pprint(result)
         except Exception as e:
             print(e)

@@ -3,6 +3,7 @@ import sys
 import pprint
 
 from utils import get_client, get_config_dir
+from zepben.eas import Query
 
 """
 Get the IDs of all calibration runs.
@@ -14,7 +15,7 @@ async def print_loop(argv):
     eas_client = get_client(config_dir)
 
     try:
-        result = await eas_client.async_get_hosting_capacity_calibration_sets()
+        result = await eas_client.query(Query.get_calibration_sets())
         pprint.pprint(result)
     except Exception as e:
         print(e)
