@@ -54,20 +54,12 @@ async def main(argv):
         ),
     )
 
-    # -------------------------------------------------------------------------
-    # MeterPlacementConfig - controls where EnergyMeters are placed
-    # -------------------------------------------------------------------------
-    meter_placement_config = MeterPlacementConfig(
-        feeder_head=True,
-        dist_transformers=True,
-        switch_meter_placement_configs=None,
-    )
 
     # -------------------------------------------------------------------------
     # ModelConfig - controls how the power flow model is built
     # -------------------------------------------------------------------------
     model_config = ModelConfig(
-        # --- Voltage limits for load/gen models (vm_pu is deprecated) ---
+        # --- Voltage limits for load/gen models ---
         load_vmin_pu=0.80,
         load_vmax_pu=1.15,
         gen_vmin_pu=0.70,
@@ -138,15 +130,21 @@ async def main(argv):
             [19100, 33000],
         ],
 
-        # --- Meter placement ---
-        meter_placement_config=meter_placement_config,
+        # -------------------------------------------------------------------------
+        # MeterPlacementConfig - controls where EnergyMeters are placed
+        # -------------------------------------------------------------------------
+        meter_placement_config = MeterPlacementConfig(
+            feeder_head=True,
+            dist_transformers=True,
+            switch_meter_placement_configs=None,
+        ),
 
         # --- Seed for reproducibility ---
         seed=123,
     )
 
     # -------------------------------------------------------------------------
-    # SolveConfig - controls how the OpenDSS model is solved
+    # SolveConfig - controls how the OpenDSS model is solved - leaving this as is is typically OK
     # -------------------------------------------------------------------------
     solve_config = SolveConfig(
         norm_vmin_pu=0.9,
@@ -162,7 +160,7 @@ async def main(argv):
     )
 
     # -------------------------------------------------------------------------
-    # RawResultsConfig - controls what raw results OpenDSS produces
+    # RawResultsConfig - controls what raw results OpenDSS produces - this isn't what it stores - typically leave as true as setting to false can cause issues for other results
     # -------------------------------------------------------------------------
     raw_results_config = RawResultsConfig(
         energy_meter_voltages_raw=True,
@@ -173,7 +171,7 @@ async def main(argv):
     )
 
     # -------------------------------------------------------------------------
-    # EnhancedMetricsConfig - controls Network Performance Metrics Enhanced table
+    # EnhancedMetricsConfig - controls Network Performance Metrics Enhanced table - leave on for standard work packages
     # -------------------------------------------------------------------------
     enhanced_metrics_config = EnhancedMetricsConfig(
         populate_enhanced_metrics=True,
@@ -189,7 +187,7 @@ async def main(argv):
     )
 
     # -------------------------------------------------------------------------
-    # StoredResultsConfig - controls which raw results are stored in the database
+    # StoredResultsConfig - controls which raw results are stored in the database - use with caution
     # -------------------------------------------------------------------------
     stored_results_config = StoredResultsConfig(
         energy_meter_voltages_raw=False,
@@ -203,7 +201,7 @@ async def main(argv):
     # -------------------------------------------------------------------------
     result_processor_config = ResultProcessorConfig(
         writer_config=WriterConfig(
-            writer_type=WriterType.POSTGRES,
+            writer_type=WriterType.POSTGRES, # or .PARQUET if using that option 
             output_writer_config=WriterOutputConfig(
                 enhanced_metrics_config=enhanced_metrics_config,
             ),
