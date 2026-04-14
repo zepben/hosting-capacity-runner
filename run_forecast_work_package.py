@@ -67,16 +67,16 @@ async def main(argv):
 
         # --- Load model ---
         load_model=1,
-        load_placement=LoadPlacement.PER_USAGE_POINT,
+        load_placement=LoadPlacement.PER_ENERGY_CONSUMER,
         load_interval_length_hours=0.5,
 
         # --- Power factor settings ---
-        p_factor_base_exports=-1,
+        p_factor_base_exports=1,
         p_factor_base_imports=1,
         p_factor_forecast_pv=1,
 
         # --- Data fix: single phase loads ---
-        fix_single_phase_loads=True,
+        fix_single_phase_loads=False,
         max_single_phase_load=30000.0,
 
         # --- Data fix: overloading consumers ---
@@ -93,8 +93,8 @@ async def main(argv):
         simplify_network=True,
         collapse_negligible_impedances=True,
         combine_common_impedances=True,
-        collapse_swer=True,
-        collapse_lv_networks=True,
+        collapse_swer=False,
+        collapse_lv_networks=False,
 
         # --- Emergency rating scaling ---
         emerg_amp_scaling=1.5,
@@ -201,7 +201,7 @@ async def main(argv):
     # -------------------------------------------------------------------------
     result_processor_config = ResultProcessorConfig(
         writer_config=WriterConfig(
-            writer_type=WriterType.POSTGRES, # or .PARQUET if using that option 
+            writer_type=WriterType.PARQUET, # or .POSTGRES if using that option 
             output_writer_config=WriterOutputConfig(
                 enhanced_metrics_config=enhanced_metrics_config,
             ),

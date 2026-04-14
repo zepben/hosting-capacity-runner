@@ -1,0 +1,17 @@
+{
+  "eas_server": {
+    "host": "<<HOST>>",
+    "port": 443,
+    "protocol": "https",
+    "client_id": "id",
+    "access_token": "<<TOKEN>>",
+    "verify_certificate": true,
+    "ca_filename": null
+  },
+  "ewb_server": {
+    "host": "<<HOST>>",
+    "port": 443,
+    "access_token": "<<TOKEN>>",
+    "ca_filename": null
+  }
+}

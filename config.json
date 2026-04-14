@@ -1,19 +1,19 @@
 {
-  "work_package_name": "NAME",
+  "work_package_name": "WORK_PACKAGE_NAME",
   "feeders": [
-    "FEEDER1","FEEDER2"
+    "CPM3B9"
   ],
   "load_time": {
     "start": "2024-04-01T00:00:00.00Z",
     "end": "2025-04-01T00:00:00.00Z"
   },
   "forecast_years": [
-    2030
+    2030,2035
   ],
   "scenarios": [
-    "base"
+    "test1"
   ],
-  "default_load_watts": [920, 910, 820, 690, 600, 530, 490, 470, 450, 450, 470, 490, 540, 600, 620, 680, 700, 700, 710, 720, 720, 730, 730, 730, 730, 730, 710, 710, 720, 730, 740, 780, 830, 890, 930, 1000, 1020, 1020, 1000, 970, 940, 900, 860, 800, 830, 870, 900, 920]
+  "default_load_watts": null,
   "default_gen_watts": null,
   "default_load_var": null,
   "default_gen_var": null
