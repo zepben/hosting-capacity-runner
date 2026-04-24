@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import grpc.aio
 from zepben.eas.client.eas_client import EasClient
-from zepben.ewb import connect_with_token, SyncNetworkConsumerClient, Feeder, NetworkConsumerClient
+from zepben.ewb import connect_with_token, Feeder, NetworkConsumerClient
 
 import logging
 
@@ -23,7 +23,7 @@ def get_config(config_dir):
     return config
 
 
-def get_client(config_dir):
+def get_client(config_dir, async_=True) -> EasClient:
     auth_config = read_json_config(f"{config_dir}/auth_config.json")
 
     return EasClient(
@@ -32,7 +32,8 @@ def get_client(config_dir):
         protocol=auth_config["eas_server"]["protocol"],
         access_token=auth_config["eas_server"]["access_token"],
         verify_certificate=auth_config["eas_server"].get("verify_certificate", True),
-        ca_filename=auth_config["eas_server"].get("ca_filename")
+        ca_filename=auth_config["eas_server"].get("ca_filename"),
+        asynchronous=async_,
     )
 
 

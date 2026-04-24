@@ -2,10 +2,8 @@ import asyncio
 import sys
 from datetime import datetime
 
-from zepben.eas import ForecastConfig
-from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
-    MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig
+from zepben.eas import Mutation, WorkPackageInput, ForecastConfigInput, TimePeriodInput, HcGeneratorConfigInput, \
+    HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, HcRawResultsConfigInput
 
 from utils import get_client, get_config, print_run, get_config_dir
 
@@ -24,11 +22,11 @@ async def main(argv):
     # Forecast Config example set up
     # This example is an extension of running a forecast work package, default load profile can also be applied to
     # feeder configs work packages too, similar to how override work packages also work with forecast work packages.
-    forecast_config = ForecastConfig(
+    forecast_config = ForecastConfigInput(
         feeders=config["feeders"],
         years=config["forecast_years"],
         scenarios=config["scenarios"],
-        load_time=TimePeriod(
+        load_time=TimePeriodInput(
             start_time=datetime.fromisoformat(config["load_time"]["start1"]),
             end_time=datetime.fromisoformat(config["load_time"]["end1"]),
         )
@@ -44,13 +42,11 @@ async def main(argv):
     default_gen_watts_profile = config["default_gen_watts"]
     default_load_var_profile = config["default_load_var"]
     default_gen_var_profile = config["default_gen_var"]
-
-    result = await eas_client.async_run_hosting_capacity_work_package(
-        WorkPackageConfig(
-            name=config["work_package_name"],
-            syf_config=forecast_config,
-            generator_config=GeneratorConfig(
-                model=ModelConfig(
+    result = await eas_client.mutation(Mutation.run_work_package(
+        WorkPackageInput(
+            forecast_config=forecast_config,
+            generator_config=HcGeneratorConfigInput(
+                model=HcModelConfigInput(
                     vmax_pu=1.2,
                     vmin_pu=0.8,
                     p_factor_base_exports=-1,
@@ -64,44 +60,27 @@ async def main(argv):
                     max_gen_tx_ratio=4.0,
                     fix_overloading_consumers=True,
                     fix_undersized_service_lines=True,
-                    feeder_scenario_allocation_strategy=FeederScenarioAllocationStrategy.ADDITIVE,
+                    feeder_scenario_allocation_strategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
                     closed_loop_v_reg_enabled=False,
                     closed_loop_v_reg_set_point=0.9925,
                     seed=123,
-                    load_interval_length_hours = 1.0,
+                    load_interval_length_hours=1.0,
                     default_load_watts=default_load_watts_profile,
                     default_gen_watts=default_gen_watts_profile,
                     default_load_var=default_load_var_profile,
                     default_gen_var=default_gen_var_profile,
                 ),
-                solve=SolveConfig(step_size_minutes=30.0),
-                raw_results=RawResultsConfig(True, True, True, True, True)
-            ),
-
-            result_processor_config=ResultProcessorConfig(
-                writer_config=WriterConfig(
-                    output_writer_config=WriterOutputConfig(
-                        enhanced_metrics_config=EnhancedMetricsConfig(
-                            True,
-                            False,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                            True,
-                        ))),
-                stored_results=StoredResultsConfig(False, False, True, False),
-                metrics=MetricsResultsConfig(True)
-            ),
-            quality_assurance_processing=True
-        )
-    )
+                solve=HcSolveConfigInput(step_size_minutes=30.0),
+                raw_results=HcRawResultsConfigInput(
+                    True, True, True, True, True
+                )
+            )
+        ),
+        work_package_name=config["work_package_name"],
+    ))
 
     print_run(result)
-    await eas_client.aclose()
+    await eas_client.close()
 
 
 if __name__ == "__main__":

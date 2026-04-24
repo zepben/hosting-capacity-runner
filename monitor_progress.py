@@ -2,6 +2,7 @@ import asyncio
 import sys
 
 from utils import get_config_dir, get_client, print_progress
+from zepben.eas import Query
 
 exit_flag = False
 
@@ -12,13 +13,13 @@ async def print_loop(argv):
 
     while not exit_flag:
         try:
-            result = await eas_client.async_get_hosting_capacity_work_packages_progress()
+            result = await  eas_client.query(Query.get_active_work_packages())
             print("Press Ctrl + C to stop monitor...")
             print_progress(result)
         except Exception as e:
             print(e)
         await asyncio.sleep(5)
-    await eas_client.aclose()
+    await eas_client.close()
 
 
 asyncio.run(print_loop(sys.argv))

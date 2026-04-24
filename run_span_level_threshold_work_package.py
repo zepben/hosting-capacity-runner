@@ -2,10 +2,9 @@ import asyncio
 import sys
 from datetime import datetime
 
-from zepben.eas import ForecastConfig
-from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
-    MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    SolveConfig, RawResultsConfig
+from zepben.eas import ForecastConfigInput, TimePeriodInput, WorkPackageInput, Mutation, HcGeneratorConfigInput, \
+    HcModelConfigInput, HcSolveConfigInput, HcRawResultsConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, \
+    HcEnhancedMetricsConfigInput, HcStoredResultsConfigInput, HcMetricsResultsConfigInput
 
 from utils import get_client, get_config, print_run, get_config_dir
 
@@ -26,46 +25,48 @@ async def main(argv):
     # The below will run a forecast-based work package for the configured feeders, years, and scenarios, over the time period specified in load_time below.
     # Note load_time reflects the base year (historical) load, and must be correctly specified to be a period of load data that exists in your system.
     # Consult your EWB HCM administrator if you do not know what load is available in your environment.
-    forecast_config = ForecastConfig(
+    forecast_config = ForecastConfigInput(
         feeders=config["feeders"],
         years=config["forecast_years"],
         scenarios=config["scenarios"],
-        load_time=TimePeriod(
+        load_time=TimePeriodInput(
             start_time=datetime.fromisoformat(config["load_time"]["start1"]),
             end_time=datetime.fromisoformat(config["load_time"]["end1"]),
         )
     )
 
     try:
-        result = await eas_client.async_run_hosting_capacity_work_package(
-            WorkPackageConfig(
-                name=config["work_package_name"],
+        result = await eas_client.mutation(Mutation.run_work_package(
+            WorkPackageInput(
                 syf_config=forecast_config,
-                generator_config=GeneratorConfig(
-                    model=ModelConfig(
+                generator_config=HcGeneratorConfigInput(
+                    model=HcModelConfigInput(
                         seed=123,
                         simplify_network=True,
-                        use_span_level_threshold=True, # Use span level threshold during network simplification
-                        simplify_plsi_threshold=10.0, # The tolerable % of difference between per length sequence impedance of connected AcLineSegment to normalize their value into a single set of values.
-                        rating_threshold=10.0, # The tolerable % of difference between span level rating or rated current of connected AcLineSegment to collapse into a single line.
-                        emerg_amp_scaling=2.0 # The scaling ratio of emergency current base on normal current.
+                        use_span_level_threshold=True,  # Use span level threshold during network simplification
+                        simplify_plsi_threshold=10.0,
+                        # The tolerable % of difference between per length sequence impedance of connected AcLineSegment to normalize their value into a single set of values.
+                        rating_threshold=10.0,
+                        # The tolerable % of difference between span level rating or rated current of connected AcLineSegment to collapse into a single line.
+                        emerg_amp_scaling=2.0  # The scaling ratio of emergency current base on normal current.
                     ),
-                    solve=SolveConfig(step_size_minutes=30.0),
-                    raw_results=RawResultsConfig()
+                    solve=HcSolveConfigInput(step_size_minutes=30.0),
+                    raw_results=HcRawResultsConfigInput()
                 ),
 
-                result_processor_config=ResultProcessorConfig(
-                    writer_config=WriterConfig(
-                        output_writer_config=WriterOutputConfig(
-                            enhanced_metrics_config=EnhancedMetricsConfig()
+                result_processor_config=HcRawResultsConfigInput(
+                    writer_config=HcWriterConfigInput(
+                        output_writer_config=HcWriterOutputConfigInput(
+                            enhanced_metrics_config=HcEnhancedMetricsConfigInput()
                         )
                     ),
-                    stored_results=StoredResultsConfig(),
-                    metrics=MetricsResultsConfig(True)
+                    stored_results=HcStoredResultsConfigInput(),
+                    metrics=HcMetricsResultsConfigInput(True)
                 ),
                 quality_assurance_processing=True
-            )
-        )
+            ),
+            work_package_name=config["work_package_name"],
+        ))
         print_run(result)
     except Exception as e:
         print(e)
