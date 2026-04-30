@@ -3,6 +3,7 @@ import copy
 import sys
 from datetime import datetime, timedelta
 
+# TODO adapt for Max's upgrades
 from zepben.eas import ForecastConfig
 from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
     MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
