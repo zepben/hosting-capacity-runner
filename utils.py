@@ -64,7 +64,7 @@ def print_run(result):
 def print_progress(result):
     logger.info("------------------------------")
     if "data" in result:
-        logger.info(f'Progress: \n{str(json.dumps(result["data"]["getWorkPackageProgress"], indent=4))}')
+        logger.info(f'Active work packages: \n{str(json.dumps(result["data"]["getActiveWorkPackages"], indent=4))}')
     else:
         logger.error("Errors:\n".join(err["message"] for err in result['errors']))
     logger.info("------------------------------")

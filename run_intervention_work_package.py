@@ -4,9 +4,9 @@ import sys
 from datetime import datetime
 
 from zepben.eas import WorkPackageInput, HcGeneratorConfigInput, HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, \
-    HcRawResultsConfigInput, FeederConfigsInput, FeederConfigInput, TimePeriodInput, HcResultProcessorConfigInput, HcWriterConfigInput, \
+    HcRawResultsConfigInput, TimePeriodInput, HcResultProcessorConfigInput, HcWriterConfigInput, \
     HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, HcStoredResultsConfigInput, HcMetricsResultsConfigInput, Mutation, Query, InterventionConfigInput, \
-    YearRangeInput, InterventionClass, CandidateGenerationConfigInput, CandidateGenerationType
+    YearRangeInput, InterventionClass, CandidateGenerationConfigInput, CandidateGenerationType, ForecastConfigInput
 
 from utils import get_client, get_config, print_run, get_config_dir, print_progress
 
@@ -25,22 +25,18 @@ async def main(argv):
     # The below will run a forecast-based work package for the configured feeders, years, and scenarios, over the time period specified in load_time below.
     # Note load_time reflects the base year (historical) load, and must be correctly specified to be a period of load data that exists in your system.
     # Consult your EWB HCM administrator if you do not know what load is available in your environment.
-    forecast_config = FeederConfigsInput(
-        configs=[
-            FeederConfigInput(
-                feeder=f,
-                years=config["forecast_years"],
-                scenarios=config["scenarios"],
-                time_period=TimePeriodInput(
-                    start_time=datetime.fromisoformat(config["load_time"]["start1"]),
-                    end_time=datetime.fromisoformat(config["load_time"]["end1"])
-                )
-            ) for f in config["feeders"]
-        ]
+    forecast_config = ForecastConfigInput(
+        feeders=config["feeders"],
+        years=config["forecast_years"],
+        scenarios=config["scenarios"],
+        time_period=TimePeriodInput(
+            start_time=datetime.fromisoformat(config["load_time"]["start1"]),
+            end_time=datetime.fromisoformat(config["load_time"]["end1"])
+        )
     )
 
     base_work_package_config = WorkPackageInput(
-        feeder_configs=forecast_config,
+        forecast_config=forecast_config,
         generator_config=HcGeneratorConfigInput(
             model=HcModelConfigInput(
                 load_vmax_pu=1.2,
@@ -114,12 +110,8 @@ async def main(argv):
             print_progress(result)
             if "data" not in result:
                 return
-            work_packages_progress = result["data"]["getWorkPackageProgress"]
-            unfinished_work_package_ids = (
-                work_packages_progress["pending"] +
-                [progress["id"] for progress in work_packages_progress["inProgress"]]
-            )
-            if base_work_package_id not in unfinished_work_package_ids:
+            active_work_packages = result["data"]["getActiveWorkPackages"]
+            if base_work_package_id not in active_work_packages:
                 break
             await asyncio.sleep(5)
 
