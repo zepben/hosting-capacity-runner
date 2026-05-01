@@ -1,14 +1,12 @@
 import asyncio
 import copy
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 
-# TODO adapt for Max's upgrades
-from zepben.eas import ForecastConfig
-from zepben.eas.client.work_package import WorkPackageConfig, TimePeriod, ResultProcessorConfig, StoredResultsConfig, \
-    MetricsResultsConfig, WriterConfig, WriterOutputConfig, EnhancedMetricsConfig, GeneratorConfig, ModelConfig, \
-    FeederScenarioAllocationStrategy, SolveConfig, RawResultsConfig, InterventionConfig, YearRange, InterventionClass, \
-    CandidateGenerationConfig, CandidateGenerationType
+from zepben.eas import WorkPackageInput, HcGeneratorConfigInput, HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, \
+    HcRawResultsConfigInput, FeederConfigsInput, FeederConfigInput, TimePeriodInput, HcResultProcessorConfigInput, HcWriterConfigInput, \
+    HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, HcStoredResultsConfigInput, HcMetricsResultsConfigInput, Mutation, Query, InterventionConfigInput, \
+    YearRangeInput, InterventionClass, CandidateGenerationConfigInput, CandidateGenerationType
 
 from utils import get_client, get_config, print_run, get_config_dir, print_progress
 
@@ -27,21 +25,24 @@ async def main(argv):
     # The below will run a forecast-based work package for the configured feeders, years, and scenarios, over the time period specified in load_time below.
     # Note load_time reflects the base year (historical) load, and must be correctly specified to be a period of load data that exists in your system.
     # Consult your EWB HCM administrator if you do not know what load is available in your environment.
-    forecast_config = ForecastConfig(
-        feeders=config["feeders"],
-        years=config["forecast_years"],
-        scenarios=config["scenarios"],
-        load_time=TimePeriod(
-            start_time=datetime.fromisoformat(config["load_time"]["start1"]),
-            end_time=datetime.fromisoformat(config["load_time"]["end1"]),
-        )
+    forecast_config = FeederConfigsInput(
+        configs=[
+            FeederConfigInput(
+                feeder=config["feeders"],
+                years=config["forecast_years"],
+                scenarios=config["scenarios"],
+                time_period=TimePeriodInput(
+                    start_time=datetime.fromisoformat(config["load_time"]["start1"]),
+                    end_time=datetime.fromisoformat(config["load_time"]["end1"])
+                )
+            )
+        ]
     )
 
-    base_work_package_config = WorkPackageConfig(
-        name=config["work_package_name"],
-        syf_config=forecast_config,
-        generator_config=GeneratorConfig(
-            model=ModelConfig(
+    base_work_package_config = WorkPackageInput(
+        feeder_configs=forecast_config,
+        generator_config=HcGeneratorConfigInput(
+            model=HcModelConfigInput(
                 load_vmax_pu=1.2,
                 load_vmin_pu=0.8,
                 p_factor_base_exports=-1,
@@ -55,19 +56,24 @@ async def main(argv):
                 max_gen_tx_ratio=4.0,
                 fix_overloading_consumers=True,
                 fix_undersized_service_lines=True,
-                feeder_scenario_allocation_strategy=FeederScenarioAllocationStrategy.ADDITIVE,
+                feeder_scenario_allocation_strategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
                 closed_loop_v_reg_enabled=False,
                 closed_loop_v_reg_set_point=0.9925,
                 seed=123,
             ),
-            solve=SolveConfig(step_size_minutes=30.0),
-            raw_results=RawResultsConfig(True, True, True, True, True)
+            solve=HcSolveConfigInput(step_size_minutes=30),
+            raw_results=HcRawResultsConfigInput(
+                energy_meter_voltages_raw=True,
+                energy_meters_raw=True,
+                overloads_raw=True,
+                results_per_meter=True,
+                voltage_exceptions_raw=True
+            )
         ),
-
-        result_processor_config=ResultProcessorConfig(
-            writer_config=WriterConfig(
-                output_writer_config=WriterOutputConfig(
-                    enhanced_metrics_config=EnhancedMetricsConfig(
+        result_processor_config=HcResultProcessorConfigInput(
+            writer_config=HcWriterConfigInput(
+                output_writer_config=HcWriterOutputConfigInput(
+                    enhanced_metrics_config=HcEnhancedMetricsConfigInput(
                         True,
                         False,
                         True,
@@ -78,9 +84,16 @@ async def main(argv):
                         True,
                         True,
                         True,
-                    ))),
-            stored_results=StoredResultsConfig(False, False, True, False),
-            metrics=MetricsResultsConfig(True)
+                    )
+                )
+            ),
+            stored_results=HcStoredResultsConfigInput(
+                energy_meter_voltages_raw=False,
+                energy_meters_raw=False,
+                overloads_raw=True,
+                voltage_exceptions_raw=False
+            ),
+            metrics=HcMetricsResultsConfigInput(calculate_performance_metrics=True)
         ),
         quality_assurance_processing=True
     )
@@ -89,7 +102,7 @@ async def main(argv):
         # ==== IF STARTING FROM SCRATCH ====
         # start base work package
         print(f"Sending base work package with config: {base_work_package_config}")
-        result = await eas_client.async_run_hosting_capacity_work_package(base_work_package_config)
+        result = await eas_client.mutation(Mutation.run_work_package(base_work_package_config, config["work_package_name"]))
         print_run(result)
         if "data" not in result:
             return
@@ -97,7 +110,7 @@ async def main(argv):
 
         # wait for work package to finish
         while True:
-            result = await eas_client.async_get_hosting_capacity_work_packages_progress()
+            result = await eas_client.query(Query.get_active_work_packages())
             print_progress(result)
             if "data" not in result:
                 return
@@ -115,15 +128,15 @@ async def main(argv):
         # ==== END ====
 
         # start intervention work package
-        intervention_config = InterventionConfig(
+        intervention_config = InterventionConfigInput(
             base_work_package_id=base_work_package_id,
-            year_range=YearRange(
+            year_range=YearRangeInput(
                 min_year=2026,
                 max_year=2030
             ),
             allocation_limit_per_year=100,
             intervention_type=InterventionClass.COMMUNITY_BESS,
-            candidate_generation=CandidateGenerationConfig(
+            candidate_generation=CandidateGenerationConfigInput(
                 type=CandidateGenerationType.CRITERIA,
                 intervention_criteria_name="threshold_set_1"
             ),
@@ -133,13 +146,13 @@ async def main(argv):
         intervention_work_package_config = copy.copy(base_work_package_config)  # shallow copy
         intervention_work_package_config.intervention = intervention_config
         print(f"Sending intervention work package with config: {intervention_work_package_config}")
-        result = await eas_client.async_run_hosting_capacity_work_package(intervention_work_package_config)
+        result = await eas_client.mutation(Mutation.run_work_package(intervention_work_package_config, config["work_package_name"]))
         print_run(result)
 
     except Exception as e:
         print(e)
 
-    await eas_client.aclose()
+    await eas_client.close()
 
 
 if __name__ == "__main__":

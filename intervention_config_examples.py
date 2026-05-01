@@ -1,6 +1,5 @@
-from zepben.eas import InterventionConfig, YearRange, InterventionClass, CandidateGenerationConfig, DvmsConfig, \
-    RegulatorConfig
-from zepben.eas.client.work_package import PhaseRebalanceProportions, CandidateGenerationType
+from zepben.eas import InterventionConfigInput, InterventionClass, CandidateGenerationType, YearRangeInput, CandidateGenerationConfigInput, DvmsConfigInput, \
+    DvmsRegulatorConfigInput, PhaseRebalanceProportionsInput
 
 # General notes:
 #  - There is a strong argument to move year_range to candidate_generation, since it's only relevant if PRRP is used.
@@ -17,10 +16,10 @@ from zepben.eas.client.work_package import PhaseRebalanceProportions, CandidateG
 # Tables used:
 #  - load_reshape_strategies
 #  - load_reshape_instances
-InterventionConfig(
+tariff_reform_intervention_config = InterventionConfigInput(
     # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
     base_work_package_id="550e8400-e29b-41d4-a716-446655440000",
-    year_range=YearRange(2026, 2030),  # no effect, but should be set to range of years base WP solved for
+    year_range=YearRangeInput(2026, 2030),  # no effect, but should be set to range of years base WP solved for
     allocation_limit_per_year=0,  # allocation_limit_per_year has no effect. Should probably default to 0
     intervention_type=InterventionClass.TARIFF_REFORM,
     candidate_generation=None,  # PRRP not needed for tariff reform
@@ -35,10 +34,10 @@ InterventionConfig(
 # Tables used:
 #  - load_reshape_strategies
 #  - load_reshape_instances
-InterventionConfig(
+controlled_load_hot_water_intervention_config = InterventionConfigInput(
     # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
     base_work_package_id="550e8400-e29b-41d4-a716-446655440001",
-    year_range=YearRange(2026, 2030),  # no effect, but should be set to range of years base WP solved for
+    year_range=YearRangeInput(2026, 2030),  # no effect, but should be set to range of years base WP solved for
     allocation_limit_per_year=0,  # allocation_limit_per_year has no effect. Should probably default to 0
     intervention_type=InterventionClass.CONTROLLED_LOAD_HOT_WATER,
     candidate_generation=None,  # PRRP not needed for CLHW
@@ -56,16 +55,16 @@ InterventionConfig(
 #  - bess_instances
 #  - intervention_candidates
 #  - bess_allocation_criteria
-InterventionConfig(
+community_bess_intervention_config = InterventionConfigInput(
     # base_work_package_id is used by PRRP to query enhanced metrics in the input database
     base_work_package_id="550e8400-e29b-41d4-a716-446655440002",
-    year_range=YearRange(
+    year_range=YearRangeInput(
         min_year=2026,  # The earliest year to find and apply intervention candidates for
         max_year=2030  # The latest year to find and apply intervention candidates for
     ),
     allocation_limit_per_year=100,  # maximum number of batteries to install per year
     intervention_type=InterventionClass.COMMUNITY_BESS,
-    candidate_generation=CandidateGenerationConfig(
+    candidate_generation=CandidateGenerationConfigInput(
         type=CandidateGenerationType.CRITERIA,  # expected for COMMUNITY_BESS
 
         # corresponds to intervention_candidate_criteria.name in input DB. Each entry has a suite of optional thresholds
@@ -89,16 +88,16 @@ InterventionConfig(
 #  - distribution_transformer_oltc_instances
 #  - intervention_candidates
 #  - distribution_transformer_oltc_allocation_criteria
-InterventionConfig(
+distribution_tx_oltc_intervention_config = InterventionConfigInput(
     # base_work_package_id is used by PRRP to query enhanced metrics in the input database
     base_work_package_id="550e8400-e29b-41d4-a716-446655440003",
-    year_range=YearRange(
+    year_range=YearRangeInput(
         min_year=2026,  # The earliest year to find and apply intervention candidates for
         max_year=2030  # The latest year to find and apply intervention candidates for
     ),
     allocation_limit_per_year=50,  # maximum number of on-load tap changers to install per year
     intervention_type=InterventionClass.DISTRIBUTION_TX_OLTC,
-    candidate_generation=CandidateGenerationConfig(
+    candidate_generation=CandidateGenerationConfigInput(
         type=CandidateGenerationType.CRITERIA,  # expected for DISTRIBUTION_TX_OLTC
 
         # corresponds to intervention_candidate_criteria.name in input DB. Each entry has a suite of optional thresholds
@@ -123,16 +122,16 @@ InterventionConfig(
 #  - lv_statcom_instances
 #  - intervention_candidates
 #  - lv_statcom_allocation_criteria
-InterventionConfig(
+lv_statcoms_intervention_config = InterventionConfigInput(
     # base_work_package_id is used by PRRP to query enhanced metrics in the input database
     base_work_package_id="550e8400-e29b-41d4-a716-446655440004",
-    year_range=YearRange(
+    year_range=YearRangeInput(
         min_year=2026,  # The earliest year to find and apply intervention candidates for
         max_year=2030  # The latest year to find and apply intervention candidates for
     ),
     allocation_limit_per_year=100,  # maximum number of batteries to install per year
     intervention_type=InterventionClass.LV_STATCOMS,
-    candidate_generation=CandidateGenerationConfig(
+    candidate_generation=CandidateGenerationConfigInput(
         type=CandidateGenerationType.CRITERIA,  # expected for LV_STATCOMS
 
         # corresponds to intervention_candidate_criteria.name in input DB. Each entry has a suite of optional thresholds
@@ -154,17 +153,17 @@ InterventionConfig(
 #       requires the solver to execute in a special mode where the model is solved 1 time step at a time in order to
 #       get the voltages needed to adjust each tap. This is the most involved of all the interventions.
 # Tables used: none
-InterventionConfig(
+dvms_intervention_config = InterventionConfigInput(
     # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
     base_work_package_id="550e8400-e29b-41d4-a716-446655440005",
-    year_range=YearRange(2026, 2030),  # no effect, but should be set to range of years base WP solved for
+    year_range=YearRangeInput(2026, 2030),  # no effect, but should be set to range of years base WP solved for
     allocation_limit_per_year=0,  # allocation_limit_per_year has no effect. Should probably default to 0
     intervention_type=InterventionClass.DVMS,
     candidate_generation=None,  # PRRP not needed for DVMS
     # allocation_criteria has no effect
     # specific_allocation_instance has no effect
     # phase_rebalance_proportions has no effect
-    dvms=DvmsConfig(
+    dvms=DvmsConfigInput(
         # The DVMS logic aims to adjust taps such that customers within the given percentile range have p.u. voltages
         # within the [lower_limit, upper_limit] range. In this example config, the customers from the 5th to the 95th
         # percentile in voltages should have voltages within 0.9-1.1 p.u.
@@ -179,7 +178,7 @@ InterventionConfig(
         # Configures simulated voltage regulator that is responsible for fulfilling the above requirements.
         # Note that the above requirements control acceptance (whether to move on to the next time step), whereas
         # these parameters configure the actual logic used to determine tap position changes.
-        regulator_config=RegulatorConfig(
+        regulator_config=DvmsRegulatorConfigInput(
             pu_target=1.0,
             # interpreted as the whole width of the deadband in % of the target, so the deadband is 0.94-1.06 p.u. here.
             pu_deadband_percent=12,
@@ -198,16 +197,16 @@ InterventionConfig(
 #                    This should be applied on networks we know to already have an uneven distribution of single-phase
 #                    customers across the three phases, which should be modelled in the base network in EWB.
 # Tables used: none
-InterventionConfig(
+phase_rebalancing_intervention_config = InterventionConfigInput(
     # base_work_package_id is only needed for record-keeping in EAS (work package B is intervention on work package A)
     base_work_package_id="550e8400-e29b-41d4-a716-446655440006",
-    year_range=YearRange(2026, 2030),  # no effect, but should be set to range of years base WP solved for
+    year_range=YearRangeInput(2026, 2030),  # no effect, but should be set to range of years base WP solved for
     allocation_limit_per_year=0,  # allocation_limit_per_year has no effect. Should probably default to 0
     intervention_type=InterventionClass.PHASE_REBALANCING,
     candidate_generation=None,  # PRRP not needed for phase rebalancing
     # allocation_criteria has no effect
     # specific_allocation_instance has no effect
-    phase_rebalance_proportions=PhaseRebalanceProportions(
+    phase_rebalance_proportions=PhaseRebalanceProportionsInput(
         # proportions used to reallocate single-phase customers. This does not have to sum to 1, but the sum should be
         # positive and none of the values should be negative. For an even distribution, use values 1, 1, 1.
         a=0.25,
@@ -224,16 +223,16 @@ InterventionConfig(
 #                                system like in DVMS--tap change candidates are generated by PRRP once using the base
 #                                work package's results rather than in each time step in solve-time.
 # Tables used: none
-InterventionConfig(
+distribution_tap_optimization_intervention_config = InterventionConfigInput(
     # base_work_package_id is used by PRRP to query enhanced metrics in the input database
     base_work_package_id="550e8400-e29b-41d4-a716-446655440007",
-    year_range=YearRange(
+    year_range=YearRangeInput(
         min_year=2026,  # The earliest year to find and apply intervention candidates for
         max_year=2030  # The latest year to find and apply intervention candidates for
     ),
     allocation_limit_per_year=10,  # maximum number of tap settings to change per year
     intervention_type=InterventionClass.DISTRIBUTION_TAP_OPTIMIZATION,
-    candidate_generation=CandidateGenerationConfig(
+    candidate_generation=CandidateGenerationConfigInput(
         type=CandidateGenerationType.TAP_OPTIMIZATION,  # expected for DISTRIBUTION_TAP_OPTIMIZATION
 
         # The following thresholds apply to each measurement zone for each year
