@@ -28,14 +28,14 @@ async def main(argv):
     forecast_config = FeederConfigsInput(
         configs=[
             FeederConfigInput(
-                feeder=config["feeders"],
+                feeder=f,
                 years=config["forecast_years"],
                 scenarios=config["scenarios"],
                 time_period=TimePeriodInput(
                     start_time=datetime.fromisoformat(config["load_time"]["start1"]),
                     end_time=datetime.fromisoformat(config["load_time"]["end1"])
                 )
-            )
+            ) for f in config["feeders"]
         ]
     )
 
@@ -74,16 +74,16 @@ async def main(argv):
             writer_config=HcWriterConfigInput(
                 output_writer_config=HcWriterOutputConfigInput(
                     enhanced_metrics_config=HcEnhancedMetricsConfigInput(
-                        True,
-                        False,
-                        True,
-                        True,
-                        True,
-                        True,
-                        True,
-                        True,
-                        True,
-                        True,
+                        calculate_co_2=True,
+                        calculate_emerg_for_gen_thermal=False,
+                        calculate_emerg_for_load_thermal=True,
+                        calculate_normal_for_gen_thermal=True,
+                        calculate_normal_for_load_thermal=True,
+                        populate_constraints=True,
+                        populate_duration_curves=True,
+                        populate_enhanced_metrics=True,
+                        populate_enhanced_metrics_profile=True,
+                        populate_weekly_reports=True,
                     )
                 )
             ),
