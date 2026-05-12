@@ -1,22 +1,81 @@
 {
   "work_package_name": "test_work_package",
-  "feeders": [
-    "feeder1", "feeder2", "feeder3"
-  ],
+  "feeders": ["WL1258", "CD1204", "49366", "SHK2", "T876", "MM1372", "AZ1253", "J499", "35384", "NE1279", "BWD2", "CA1265", "L528", "OP1192", "DS1256", "8801", "CT1273", "GV1282", "MR2232", "AB1287"],
   "load_time": {
-    "start1": "2023-02-22T00:00:00.00Z",
-    "end1": "2024-02-22T00:00:00.00Z",
-    "start2": "2023-07-22T00:00:00.00Z",
-    "end2": "2024-01-22T00:00:00.00Z"
+    "start": "2025-01-01T00:00:00.00Z",
+    "end": "2026-01-01T00:00:00.00Z"
   },
   "forecast_years": [
-    2024
+    2030
   ],
   "scenarios": [
-    "base"
+    "test_scenario_1"
   ],
-  "default_load_watts": [920, 910, 820, 690, 600, 530, 490, 470, 450, 450, 470, 490, 540, 600, 620, 680, 700, 700, 710, 720, 720, 730, 730, 730, 730, 730, 710, 710, 720, 730, 740, 780, 830, 890, 930, 1000, 1020, 1020, 1000, 970, 940, 900, 860, 800, 830, 870, 900, 920]
+  "default_load_watts": [920, 910, 820, 690, 600, 530, 490, 470, 450, 450, 470, 490, 540, 600, 620, 680, 700, 700, 710, 720, 720, 730, 730, 730, 730, 730, 710, 710, 720, 730, 740, 780, 830, 890, 930, 1000, 1020, 1020, 1000, 970, 940, 900, 860, 800, 830, 870, 900, 920],
   "default_gen_watts": null,
   "default_load_var": null,
-  "default_gen_var": null
+  "default_gen_var": null,
+  "intervention": {
+
+
+
+    
+    "base_work_package_id": "0cb8d9ff-5c36-4fbb-b602-0215de51cdfe",
+    "intervention_type": "PHASE_REBALANCING",
+
+
+
+
+    "year_range": {"min_year": 2030, "max_year": 2030},
+    "COMMUNITY_BESS": {
+      "candidate_criteria": null,
+      "allocation_criteria": null,
+      "specific_allocation_instance": null,
+      "allocation_limit_per_year": null
+    },
+    "LV_STATCOMS": {
+      "candidate_criteria": null,
+      "allocation_criteria": null,
+      "specific_allocation_instance": null,
+      "allocation_limit_per_year": null
+    },
+    "DISTRIBUTION_TX_OLTC": {
+      "candidate_criteria": null,
+      "allocation_criteria": null,
+      "specific_allocation_instance": null,
+      "allocation_limit_per_year": null
+    },
+    "DISTRIBUTION_TAP_OPTIMIZATION": {
+      "allocation_limit_per_year": null,
+      "average_voltage_spread_threshold": 40,
+      "voltage_under_limit_hours_threshold": 48,
+      "voltage_over_limit_hours_threshold": 48,
+      "tap_weighting_factor_lower_threshold": -10.0,
+      "tap_weighting_factor_upper_threshold": 10.0
+    },
+    "TARIFF_REFORM": {
+      "allocation_criteria": null
+    },
+    "CONTROLLED_LOAD_HOT_WATER": {
+      "allocation_criteria": null
+    },
+    "DVMS": {
+      "lower_limit": 0.9,
+      "upper_limit": 1.1,
+      "lower_percentile": 5,
+      "upper_percentile": 95,
+      "max_iterations": 3,
+      "regulator_config": {
+        "pu_target": 1.0,
+        "pu_deadband_percent": 12,
+        "max_tap_change_per_step": 2,
+        "allow_push_to_limit": true
+      }
+    },
+    "PHASE_REBALANCING": {
+      "a": 1,
+      "b": 1,
+      "c": 1
+    }
+  }
 }

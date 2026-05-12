@@ -2,10 +2,7 @@ import asyncio
 import sys
 from datetime import datetime
 
-from zepben.eas import ForecastConfigInput, TimePeriodInput, Mutation, WorkPackageInput, HcGeneratorConfigInput, \
-    HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, HcRawResultsConfigInput, \
-    HcResultProcessorConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, \
-    HcStoredResultsConfigInput, HcMetricsResultsConfigInput
+from zepben.eas import ForecastConfigInput, TimePeriodInput, Mutation, WorkPackageInput, HcGeneratorConfigInput, HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, HcRawResultsConfigInput, HcResultProcessorConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, HcStoredResultsConfigInput, HcMetricsResultsConfigInput
 
 from utils import get_client, get_config, print_run, get_config_dir
 
@@ -30,16 +27,16 @@ async def main(argv):
         feeders=config["feeders"],
         years=config["forecast_years"],
         scenarios=config["scenarios"],
-        load_time=TimePeriodInput(
-            start_time=datetime.fromisoformat(config["load_time"]["start1"]),
-            end_time=datetime.fromisoformat(config["load_time"]["end1"]),
+        time_period=TimePeriodInput(
+            start_time=datetime.fromisoformat(config["load_time"]["start"]).replace(tzinfo=None),
+            end_time=datetime.fromisoformat(config["load_time"]["end"]).replace(tzinfo=None),
         )
     )
 
     try:
         result = await eas_client.mutation(Mutation.run_work_package(
             WorkPackageInput(
-                syf_config=forecast_config,
+                forecast_config=forecast_config,
                 generator_config=HcGeneratorConfigInput(
                     model=HcModelConfigInput(
                         load_vmax_pu=1.2,
@@ -61,28 +58,39 @@ async def main(argv):
                         seed=123,
                     ),
                     solve=HcSolveConfigInput(step_size_minutes=30.0),
-                    raw_results=HcRawResultsConfigInput(True, True, True, True, True)
+                    raw_results=HcRawResultsConfigInput(
+                        energy_meter_voltages_raw=True,
+                        energy_meters_raw=True,
+                        overloads_raw=True,
+                        results_per_meter=True,
+                        voltage_exceptions_raw=True,
+                    )
                 ),
 
                 result_processor_config=HcResultProcessorConfigInput(
                     writer_config=HcWriterConfigInput(
                         output_writer_config=HcWriterOutputConfigInput(
                             enhanced_metrics_config=HcEnhancedMetricsConfigInput(
-                                True,
-                                False,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
+                                calculate_co_2=False,
+                                calculate_emerg_for_gen_thermal=True,
+                                calculate_emerg_for_load_thermal=True,
+                                calculate_normal_for_gen_thermal=True,
+                                calculate_normal_for_load_thermal=True,
+                                populate_constraints=False,
+                                populate_duration_curves=True,
+                                populate_enhanced_metrics=True,
+                                populate_enhanced_metrics_profile=False,
+                                populate_weekly_reports=False,
                             ))),
-                    stored_results=HcStoredResultsConfigInput(False, False, True, False),
-                    metrics=HcMetricsResultsConfigInput(True)
+                    stored_results=HcStoredResultsConfigInput(
+                        energy_meter_voltages_raw=False,
+                        energy_meters_raw=False,
+                        overloads_raw=False,
+                        voltage_exceptions_raw=False,
+                    ),
+                    metrics=HcMetricsResultsConfigInput(calculate_performance_metrics=False)
                 ),
-                quality_assurance_processing=True
+                quality_assurance_processing=False
             ),
             work_package_name=config["work_package_name"],
         ))
