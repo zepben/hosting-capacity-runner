@@ -30,59 +30,70 @@ async def main(argv):
         feeders=config["feeders"],
         years=config["forecast_years"],
         scenarios=config["scenarios"],
-        load_time=TimePeriodInput(
-            start_time=datetime.fromisoformat(config["load_time"]["start1"]),
-            end_time=datetime.fromisoformat(config["load_time"]["end1"]),
+        timePeriod=TimePeriodInput(
+            startTime=datetime.fromisoformat(config["load_time"]["start1"]),
+            endTime=datetime.fromisoformat(config["load_time"]["end1"]),
         )
     )
 
     try:
         result = await eas_client.mutation(Mutation.run_work_package(
             WorkPackageInput(
-                syf_config=forecast_config,
-                generator_config=HcGeneratorConfigInput(
+                forecastConfig=forecast_config,
+                generatorConfig=HcGeneratorConfigInput(
                     model=HcModelConfigInput(
-                        load_vmax_pu=1.2,
-                        load_vmin_pu=0.8,
-                        p_factor_base_exports=-1,
-                        p_factor_base_imports=1,
-                        p_factor_forecast_pv=1,
-                        fix_single_phase_loads=False,
-                        max_single_phase_load=15000.0,
-                        max_load_service_line_ratio=1.0,
-                        max_load_lv_line_ratio=2.0,
-                        max_load_tx_ratio=2.0,
-                        max_gen_tx_ratio=4.0,
-                        fix_overloading_consumers=True,
-                        fix_undersized_service_lines=True,
-                        feeder_scenario_allocation_strategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
-                        closed_loop_v_reg_enabled=False,
-                        closed_loop_v_reg_set_point=0.9925,
+                        loadVMaxPu=1.2,
+                        loadVMinPu=0.8,
+                        pFactorBaseExports=-1,
+                        pFactorBaseImports=1,
+                        pFactorForecastPv=1,
+                        fixSinglePhaseLoads=False,
+                        maxSinglePhaseLoad=15000.0,
+                        maxLoadServiceLineRatio=1.0,
+                        maxLoadLvLineRatio=2.0,
+                        maxLoadTxRatio=2.0,
+                        maxGenTxRatio=4.0,
+                        fixOverloadingConsumers=True,
+                        fixUndersizedServiceLines=True,
+                        feederScenarioAllocationStrategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
+                        closedLoopVRegEnabled=False,
+                        closedLoopVRegSetPoint=0.9925,
                         seed=123,
                     ),
-                    solve=HcSolveConfigInput(step_size_minutes=30.0),
-                    raw_results=HcRawResultsConfigInput(True, True, True, True, True)
+                    solve=HcSolveConfigInput(stepSizeMinutes=30),
+                    rawResults=HcRawResultsConfigInput(
+                        overloadsRaw=True,
+                        energyMetersRaw=True,
+                        energyMeterVoltagesRaw=True,
+                        voltageExceptionsRaw=True,
+                        resultsPerMeter=True
+                    ),
                 ),
 
-                result_processor_config=HcResultProcessorConfigInput(
-                    writer_config=HcWriterConfigInput(
-                        output_writer_config=HcWriterOutputConfigInput(
-                            enhanced_metrics_config=HcEnhancedMetricsConfigInput(
-                                True,
-                                False,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
+                resultProcessorConfig=HcResultProcessorConfigInput(
+                    writerConfig=HcWriterConfigInput(
+                        outputWriterConfig=HcWriterOutputConfigInput(
+                            enhancedMetricsConfig=HcEnhancedMetricsConfigInput(
+                                populateEnhancedMetrics=True,
+                                populateEnhancedMetricsProfile=False,
+                                calculateEmergForLoadThermal=True,
+                                calculateNormalForLoadThermal=True,
+                                calculateCO2=True,
+                                populateConstraints=True,
+                                populateWeeklyReports=True,
+                                populateDurationCurves=True,
+                                calculateEmergForGenThermal=True,
+                                calculateNormalForGenThermal=True,
                             ))),
-                    stored_results=HcStoredResultsConfigInput(False, False, True, False),
-                    metrics=HcMetricsResultsConfigInput(True)
+                    storedResults=HcStoredResultsConfigInput(
+                        voltageExceptionsRaw=False,
+                        overloadsRaw=True,
+                        energyMetersRaw=False,
+                        energyMeterVoltagesRaw=False
+                    ),
+                    metrics=HcMetricsResultsConfigInput(calculatePerformanceMetrics=True)
                 ),
-                quality_assurance_processing=True
+                qualityAssuranceProcessing=True
             ),
             work_package_name=config["work_package_name"],
         ))

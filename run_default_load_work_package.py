@@ -26,9 +26,9 @@ async def main(argv):
         feeders=config["feeders"],
         years=config["forecast_years"],
         scenarios=config["scenarios"],
-        load_time=TimePeriodInput(
-            start_time=datetime.fromisoformat(config["load_time"]["start1"]),
-            end_time=datetime.fromisoformat(config["load_time"]["end1"]),
+        timePeriod=TimePeriodInput(
+            startTime=datetime.fromisoformat(config["load_time"]["start1"]),
+            endTime=datetime.fromisoformat(config["load_time"]["end1"]),
         )
     )
 
@@ -44,36 +44,40 @@ async def main(argv):
     default_gen_var_profile = config["default_gen_var"]
     result = await eas_client.mutation(Mutation.run_work_package(
         WorkPackageInput(
-            forecast_config=forecast_config,
-            generator_config=HcGeneratorConfigInput(
+            forecastConfig=forecast_config,
+            generatorConfig=HcGeneratorConfigInput(
                 model=HcModelConfigInput(
-                    vmax_pu=1.2,
-                    vmin_pu=0.8,
-                    p_factor_base_exports=-1,
-                    p_factor_base_imports=1,
-                    p_factor_forecast_pv=1,
-                    fix_single_phase_loads=False,
-                    max_single_phase_load=15000.0,
-                    max_load_service_line_ratio=1.0,
-                    max_load_lv_line_ratio=2.0,
-                    max_load_tx_ratio=2.0,
-                    max_gen_tx_ratio=4.0,
-                    fix_overloading_consumers=True,
-                    fix_undersized_service_lines=True,
-                    feeder_scenario_allocation_strategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
-                    closed_loop_v_reg_enabled=False,
-                    closed_loop_v_reg_set_point=0.9925,
+                    loadVMaxPu=1.2,
+                    loadVMinPu=0.8,
+                    pFactorBaseExports=-1,
+                    pFactorBaseImports=1,
+                    pFactorForecastPv=1,
+                    fixSinglePhaseLoads=False,
+                    maxSinglePhaseLoad=15000.0,
+                    maxLoadServiceLineRatio=1.0,
+                    maxLoadLvLineRatio=2.0,
+                    maxLoadTxRatio=2.0,
+                    maxGenTxRatio=4.0,
+                    fixOverloadingConsumers=True,
+                    fixUndersizedServiceLines=True,
+                    feederScenarioAllocationStrategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
+                    closedLoopVRegEnabled=False,
+                    closedLoopVRegSetPoint=0.9925,
                     seed=123,
-                    load_interval_length_hours=1.0,
-                    default_load_watts=default_load_watts_profile,
-                    default_gen_watts=default_gen_watts_profile,
-                    default_load_var=default_load_var_profile,
-                    default_gen_var=default_gen_var_profile,
+                    loadIntervalLengthHours=1.0,
+                    defaultLoadWatts=default_load_watts_profile,
+                    defaultGenWatts=default_gen_watts_profile,
+                    defaultLoadVar=default_load_var_profile,
+                    defaultGenVar=default_gen_var_profile,
                 ),
-                solve=HcSolveConfigInput(step_size_minutes=30.0),
-                raw_results=HcRawResultsConfigInput(
-                    True, True, True, True, True
-                )
+                solve=HcSolveConfigInput(stepSizeMinutes=30),
+                rawResults=HcRawResultsConfigInput(
+                    overloadsRaw=True,
+                    energyMetersRaw=True,
+                    energyMeterVoltagesRaw=True,
+                    voltageExceptionsRaw=True,
+                    resultsPerMeter=True
+                ),
             )
         ),
         work_package_name=config["work_package_name"],

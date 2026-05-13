@@ -4,7 +4,7 @@ from datetime import datetime
 
 from zepben.eas import ForecastConfigInput, TimePeriodInput, WorkPackageInput, Mutation, HcGeneratorConfigInput, \
     HcModelConfigInput, HcSolveConfigInput, HcRawResultsConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, \
-    HcEnhancedMetricsConfigInput, HcStoredResultsConfigInput, HcMetricsResultsConfigInput
+    HcEnhancedMetricsConfigInput, HcStoredResultsConfigInput, HcMetricsResultsConfigInput, HcResultProcessorConfigInput
 
 from utils import get_client, get_config, print_run, get_config_dir
 
@@ -29,41 +29,41 @@ async def main(argv):
         feeders=config["feeders"],
         years=config["forecast_years"],
         scenarios=config["scenarios"],
-        load_time=TimePeriodInput(
-            start_time=datetime.fromisoformat(config["load_time"]["start1"]),
-            end_time=datetime.fromisoformat(config["load_time"]["end1"]),
+        timePeriod=TimePeriodInput(
+            startTime=datetime.fromisoformat(config["load_time"]["start1"]),
+            endTime=datetime.fromisoformat(config["load_time"]["end1"]),
         )
     )
 
     try:
         result = await eas_client.mutation(Mutation.run_work_package(
             WorkPackageInput(
-                syf_config=forecast_config,
-                generator_config=HcGeneratorConfigInput(
+                forecastConfig=forecast_config,
+                generatorConfig=HcGeneratorConfigInput(
                     model=HcModelConfigInput(
                         seed=123,
-                        simplify_network=True,
-                        use_span_level_threshold=True,  # Use span level threshold during network simplification
-                        simplify_plsi_threshold=10.0,
+                        simplifyNetwork=True,
+                        useSpanLevelThreshold=True,  # Use span level threshold during network simplification
+                        simplifyPLSIThreshold=10.0,
                         # The tolerable % of difference between per length sequence impedance of connected AcLineSegment to normalize their value into a single set of values.
-                        rating_threshold=10.0,
+                        ratingThreshold=10.0,
                         # The tolerable % of difference between span level rating or rated current of connected AcLineSegment to collapse into a single line.
-                        emerg_amp_scaling=2.0  # The scaling ratio of emergency current base on normal current.
+                        emergAmpScaling=2.0  # The scaling ratio of emergency current base on normal current.
                     ),
-                    solve=HcSolveConfigInput(step_size_minutes=30.0),
-                    raw_results=HcRawResultsConfigInput()
+                    solve=HcSolveConfigInput(stepSizeMinutes=30),
+                    rawResults=HcRawResultsConfigInput()
                 ),
 
-                result_processor_config=HcRawResultsConfigInput(
-                    writer_config=HcWriterConfigInput(
-                        output_writer_config=HcWriterOutputConfigInput(
-                            enhanced_metrics_config=HcEnhancedMetricsConfigInput()
+                resultProcessorConfig=HcResultProcessorConfigInput(
+                    writerConfig=HcWriterConfigInput(
+                        outputWriterConfig=HcWriterOutputConfigInput(
+                            enhancedMetricsConfig=HcEnhancedMetricsConfigInput()
                         )
                     ),
-                    stored_results=HcStoredResultsConfigInput(),
-                    metrics=HcMetricsResultsConfigInput(True)
+                    storedResults=HcStoredResultsConfigInput(),
+                    metrics=HcMetricsResultsConfigInput(calculatePerformanceMetrics=True)
                 ),
-                quality_assurance_processing=True
+                qualityAssuranceProcessing=True
             ),
             work_package_name=config["work_package_name"],
         ))
@@ -71,7 +71,7 @@ async def main(argv):
     except Exception as e:
         print(e)
 
-    await eas_client.aclose()
+    await eas_client.close()
 
 
 if __name__ == "__main__":

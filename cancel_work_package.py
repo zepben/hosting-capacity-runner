@@ -15,7 +15,7 @@ async def main(argv):
     except Exception as e:
         print(e)
 
-    await eas_client.aclose()
+    await eas_client.close()
 
 
 if __name__ == "__main__":

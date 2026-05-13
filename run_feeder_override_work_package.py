@@ -36,25 +36,25 @@ async def main(argv):
                 feeder="<FEEDER_MRID_1>",
                 years=[2025],  # Ignored as scenario is base.
                 scenarios=["base"],
-                load_time=FixedTimeInput(
-                    load_time=datetime.fromisoformat(config["load_time"]["start1"]),
+                fixedTime=FixedTimeInput(
+                    loadTime=datetime.fromisoformat(config["load_time"]["start1"]),
                     # Override two loads load profiles.
                     # Note if these load ids don't exist in the feeder, this will have no effect so ensure this is mapped correctly.
-                    load_overrides=
+                    overrides=
                     [
                         FixedTimeLoadOverrideInput(
-                            load_id="<load_id1>",
-                            load_watts=[5000.0],
-                            load_var=[50.0],
-                            gen_var=None,
-                            gen_watts=None
+                            loadId="<load_id1>",
+                            loadWattsOverride=[5000.0],
+                            loadVarOverride=[50.0],
+                            genVarOverride=None,
+                            genWattsOverride=None
                         ),
                         FixedTimeLoadOverrideInput(
-                            load_id="<load_id2>",
-                            load_watts=[5000.0],
-                            load_var=[50.0],
-                            gen_var=None,
-                            gen_watts=None
+                            loadId="<load_id1>",
+                            loadWattsOverride=[5000.0],
+                            loadVarOverride=[50.0],
+                            genVarOverride=None,
+                            genWattsOverride=None
                         ),
                     ]
                 )
@@ -67,17 +67,19 @@ async def main(argv):
                 feeder="<FEEDER_MRID_2>",
                 years=config["forecast_years"],
                 scenarios=config["scenarios"],
-                load_time=FixedTimeInput(
-                    load_time=datetime.fromisoformat(config["load_time"]["start1"]),
-                    load_overrides=
-                    {"<load_id3>": FixedTimeLoadOverrideInput(
-                        # Fixed time load override supports any number of entries, however if an override is supplied it must be the same number of entries
-                        # for all. In the below example, every list supplied must have exactly 3 entries.
-                        load_watts=[10000.0, 20000.0, 30000.0],
-                        load_var=[50.0, 100.0, 150.0],
-                        gen_var=None,
-                        gen_watts=None
-                    )}
+                fixedTime=FixedTimeInput(
+                    loadTime=datetime.fromisoformat(config["load_time"]["start1"]),
+                    overrides=[
+                        FixedTimeLoadOverrideInput(
+                            loadId="<load_id3>",
+                            # Fixed time load override supports any number of entries, however if an override is supplied it must be the same number of entries
+                            # for all. In the below example, every list supplied must have exactly 3 entries.
+                            loadWattsOverride=[10000.0, 20000.0, 30000.0],
+                            loadVarOverride=[50.0, 100.0, 150.0],
+                            genVarOverride=None,
+                            genWattsOverride=None
+                        )
+                    ]
                 )
             )
         ]
@@ -86,48 +88,53 @@ async def main(argv):
     try:
         result = await  eas_client.mutation(Mutation.run_work_package(
             WorkPackageInput(
-                feeder_configs=feeder_configs,
-                generator_config=HcGeneratorConfigInput(
+                feederConfigs=feeder_configs,
+                generatorConfig=HcGeneratorConfigInput(
                     model=HcModelConfigInput(
-                        load_vmax_pu=1.2,
-                        load_vmin_pu=0.8,
-                        p_factor_base_exports=-1,
-                        p_factor_base_imports=1,
-                        p_factor_forecast_pv=1,
-                        fix_single_phase_loads=False,
-                        max_single_phase_load=15000.0,
-                        max_load_service_line_ratio=1.0,
-                        max_load_lv_line_ratio=2.0,
-                        max_load_tx_ratio=2.0,
-                        max_gen_tx_ratio=4.0,
-                        fix_overloading_consumers=True,
-                        fix_undersized_service_lines=True,
-                        feeder_scenario_allocation_strategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
-                        closed_loop_v_reg_enabled=False,
-                        closed_loop_v_reg_set_point=0.9925,
+                        loadVMaxPu=1.2,
+                        loadVMinPu=0.8,
+                        pFactorBaseExports=-1,
+                        pFactorBaseImports=1,
+                        pFactorForecastPv=1,
+                        fixSinglePhaseLoads=False,
+                        maxSinglePhaseLoad=15000.0,
+                        maxLoadServiceLineRatio=1.0,
+                        maxLoadLvLineRatio=2.0,
+                        maxLoadTxRatio=2.0,
+                        maxGenTxRatio=4.0,
+                        fixOverloadingConsumers=True,
+                        fixUndersizedServiceLines=True,
+                        feederScenarioAllocationStrategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
+                        closedLoopVRegEnabled=False,
+                        closedLoopVRegSetPoint=0.9925,
                         seed=123,
                     )
                 ),
-                result_processor_config=HcResultProcessorConfigInput(
-                    writer_config=HcWriterConfigInput(
+                resultProcessorConfig=HcResultProcessorConfigInput(
+                    writerConfig=HcWriterConfigInput(
 
-                        output_writer_config=HcWriterOutputConfigInput(
-                            enhanced_metrics_config=HcEnhancedMetricsConfigInput(
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
-                                True,
+                        outputWriterConfig=HcWriterOutputConfigInput(
+                            enhancedMetricsConfig=HcEnhancedMetricsConfigInput(
+                                populateEnhancedMetrics=True,
+                                populateEnhancedMetricsProfile=True,
+                                calculateEmergForLoadThermal=True,
+                                calculateNormalForLoadThermal=True,
+                                calculateCO2=True,
+                                populateConstraints=True,
+                                populateWeeklyReports=True,
+                                populateDurationCurves=True,
+                                calculateEmergForGenThermal=True,
+                                calculateNormalForGenThermal=True,
                             ))),
-                    stored_results=HcStoredResultsConfigInput(True, True, True, True),
-                    metrics=HcMetricsResultsConfigInput(True)
+                    storedResults=HcStoredResultsConfigInput(
+                        voltageExceptionsRaw=True,
+                        overloadsRaw=True,
+                        energyMetersRaw=True,
+                        energyMeterVoltagesRaw=True
+                    ),
+                    metrics=HcMetricsResultsConfigInput(calculatePerformanceMetrics=True)
                 ),
-                quality_assurance_processing=True
+                qualityAssuranceProcessing=True
             ),
             work_package_name=config["work_package_name"],
         ))
