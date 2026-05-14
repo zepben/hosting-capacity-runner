@@ -10,9 +10,9 @@ from zepben.eas import Mutation, WorkPackageInput, HcGeneratorConfigInput, HcMod
 from utils import get_client, get_config, print_run, get_config_dir
 
 """
-This script provides an example of how to run a work package with configuration for overriding the load data for specific 
+This script provides an example of how to run a work package with configuration for overriding the load data for specific
 loads in the feeders. This allows you to perform single timestep, fixed time studies for a feeder.
-Note overrides are experimental features, and this entails advanced usage of the HCM module. 
+Note overrides are experimental features, and this entails advanced usage of the HCM module.
 Please contact Zepben to ensure you are creating an efficient and scalable solution with these features.
 """
 
@@ -127,10 +127,10 @@ async def main(argv):
                                 calculateNormalForGenThermal=True,
                             ))),
                     storedResults=HcStoredResultsConfigInput(
-                        voltageExceptionsRaw=True,
+                        voltageExceptionsRaw=False,
                         overloadsRaw=True,
-                        energyMetersRaw=True,
-                        energyMeterVoltagesRaw=True
+                        energyMetersRaw=False,
+                        energyMeterVoltagesRaw=False
                     ),
                     metrics=HcMetricsResultsConfigInput(calculatePerformanceMetrics=True)
                 ),

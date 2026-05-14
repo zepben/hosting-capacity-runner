@@ -10,7 +10,7 @@ from utils import get_client, get_config, print_run, get_config_dir
 """
 This script provides an example of how to run a forecast work package with default load profile specified in the
 ModelConfig so usage point without corresponding load profile in the database will use the provided profile instead
-of blank. 
+of blank.
 """
 
 
@@ -72,11 +72,11 @@ async def main(argv):
                 ),
                 solve=HcSolveConfigInput(stepSizeMinutes=30),
                 rawResults=HcRawResultsConfigInput(
+                    voltageExceptionsRaw=False,
                     overloadsRaw=True,
-                    energyMetersRaw=True,
-                    energyMeterVoltagesRaw=True,
-                    voltageExceptionsRaw=True,
-                    resultsPerMeter=True
+                    energyMetersRaw=False,
+                    energyMeterVoltagesRaw=False,
+                    resultsPerMeter=False
                 ),
             )
         ),
