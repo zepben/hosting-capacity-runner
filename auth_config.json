@@ -3,7 +3,6 @@
     "host": "<eas-host>",
     "port": 443,
     "protocol": "https",
-    "client_id": "<client_id>",
     "access_token": "<access_token>",
     "verify_certificate": true,
     "ca_filename": null

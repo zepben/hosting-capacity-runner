@@ -1,4 +1,4 @@
-# hosting-capacity-runner
+# Hosting Capacity Runner
 
 Python script to request run for hosting capacity work package.
 
@@ -6,32 +6,29 @@ Python script to request run for hosting capacity work package.
 
 Run the following to install dependencies.
 
-      pip install -r requirements.txt
-
+```sh
+pip install -r requirements.txt
+```
 
 ## Usage
 
-1. Update the **auth_config.json** file to hold your configuration for authentication.
+1. Update the **auth_config.json** file to with the authentication details for the Zepben EWB instance you are connecting to
 2. Update the **config.json file** with the feeders, years, and scenarios you want to run.
-3. Run the **run_forecast_work_package.py** python script passing the directory where the **auth_config.json** and **config.json** files
-   are located (If no config directory is passed it will look for the config files in the current directory).
+3. Run the **run_forecast_work_package.py** python script passing the directory where the **auth_config.json** and **config.json** files are located (If no config directory is passed it will look for the config files in the current directory).
 
-   ```shell
-       ./run_forecast_work_package.py ./config
-   ```
+    ```shell
+    ./run_forecast_work_package.py ./config
+    ```
 
 The `monitor_progress.py` script can also be used to retrieve and print progress of your work package.
 
-
 ### Calibration
 
-Use `run_calibration.py ./config` to launch a calibration workflow.
+1. Use `run_calibration.py ./config` to launch a calibration workflow.
+2. Modify and use `monitor_calibration_run.py ./config` to monitor the status of a calibration workflow.
+3. Use `check_calibration_sets.py ./config` to retrieve the IDs of all calibration results that have been run.
+4. Modify and use `get_calibration_transformer_settings.py ./config` to retrieve the calculated distribution transformer tap settings from the calibration run.
 
-Modify and use `monitor_calibration_run.py ./config` to monitor the status of a calibration workflow.
-
-Use `check_calibration_sets.py ./config` to retrieve the IDs of all calibration results that have been run.
-
-Modify and use `get_calibration_transformer_settings.py ./config` to retrieve the calculated distribution transformer tap settings from the calibration run.
 These settings can then be configured in a hosting capacity work package to apply the tap settings to the models.
 
 #### Workflow
