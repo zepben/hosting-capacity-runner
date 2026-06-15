@@ -5,12 +5,12 @@ from datetime import datetime
 from zepben.eas import HcFeederScenarioAllocationStrategy, HcGeneratorConfigInput, \
     HcModelConfigInput, Mutation
 
-from utils import get_client, get_config_dir, fetch_feeders
+from utils import get_client, get_config_dir, fetch_feeders, print_run
 
 """
 Perform a calibration run which will utilise PQV data to model the network, and output voltage deltas between the PQV actuals and the
 simulated network. Find more information on calibration at:
-    https://zepben.github.io/evolve/docs/hosting-capacity-service/docs/next/how-to-guides/calibration#option-2-using-the-python-api
+    https://zepben.github.io/evolve/docs/hosting-capacity-service/docs/next/how-to-guides/calibration#how-to-run
 
 Use the returned result with monitor_calibration_run.py to monitor
 """
@@ -24,6 +24,7 @@ async def main(argv):
     # To do a calibration run with all feeders, populate ewb_server in your auth_config.json file and uncomment the below.
     # This will use the SDK to fetch the network hierarchy and retrieve all the feeder mRIDs.
     # Note running all feeders will take significantly longer and has cost implications so should be performed with care.
+    
     # feeders = await fetch_feeders(config_dir)
     # feeder_mrids = [f.mrid for f in feeders[:10]]   # Take only first 10 feeders to avoid running too many.
 
@@ -67,7 +68,7 @@ async def main(argv):
                 )
             )
         )
-        print(result)
+        print_run(result)
     except Exception as e:
         print(e)
 
@@ -75,5 +76,4 @@ async def main(argv):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(sys.argv))
+    asyncio.run(main(sys.argv))

@@ -1,3 +1,6 @@
 .venv/
+.venv-311/
 __pycache__/
 .idea/
+auth_config.json
+*.pyc

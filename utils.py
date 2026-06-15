@@ -56,7 +56,8 @@ def print_cancel(result):
 
 def print_run(result):
     if "data" in result:
-        print(f'work_package_id=\n{result["data"]["runWorkPackage"]}')
+        work_package_id = next(iter(result["data"].values()))
+        print(f'work_package_id=\n{work_package_id}')
     else:
         print("Errors:\n", "\n".join(err["message"] for err in result['errors']))
 
