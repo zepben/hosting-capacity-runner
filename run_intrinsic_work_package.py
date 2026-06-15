@@ -1,19 +1,20 @@
+"""
+This script provides an example of how to run an Intrinsic Hosting Capacity work package.
+
+Intrinsic mode inverts the standard hosting capacity question: instead of testing a specific DER scenario,
+it finds how much additional load or generation the network can support before hitting a voltage or thermal limit.
+"""
+
 import asyncio
 import sys
 from datetime import datetime
-from zepben.eas import Mutation, IntrinsicWorkPackageInput, IntrinsicSyfConfigInput, IntrinsicAllocationConfigInput, \
-    IntrinsicSearchConfigInput, IntrinsicCapacityGroupPlacementType, IntrinsicInitialLoadStateConfigInput, \
-    HcModelConfigInput, IntrinsicWriterConfigInput, IntrinsicInitialStateSelectorMode, IntrinsicConstraintsConfigInput, \
-    IntrinsicThermalConstraintsInput, IntrinsicVoltageConstraintsInput, IntrinsicLvVoltageConstraintInput, \
-    IntrinsicInjectionResourceConfigInput,IntrinsicInjectionResourceMethod,IntrinsicLoadModelType
+from zepben.eas import Mutation, IntrinsicWorkPackageInput, IntrinsicSyfConfigInput, \
+    IntrinsicSearchConfigInput, IntrinsicInitialLoadStateConfigInput, \
+    IntrinsicInitialStateSelectorMode, IntrinsicConstraintsConfigInput, \
+    IntrinsicVoltageConstraintsInput, IntrinsicLvVoltageConstraintInput, \
+    IntrinsicInjectionResourceConfigInput, IntrinsicInjectionResourceMethod, IntrinsicLoadModelType
 
 from utils import get_client, get_config, print_run, get_config_dir
-
-"""
-This script provides an example of how to run a forecast work package for long term planning studies.
-It allows you to configure a WorkPackage to run 10+ years of timeseries load flows for a given set of scenarios for a
-configurable set of feeders.
-"""
 
 
 async def main(argv):
@@ -24,36 +25,36 @@ async def main(argv):
     try:
         result = await eas_client.mutation(Mutation.run_intrinsic_work_package(
             IntrinsicWorkPackageInput(
-                syfConfig=IntrinsicSyfConfigInput(
+                syf=IntrinsicSyfConfigInput(
                     feeders=config["feeders"],
-                    scenarios=["base"],
-                    years=config["years"]
+                    scenario="base",
+                    year=config["forecast_years"][0]
                 ),
-                initialStateSelectorConfig=IntrinsicInitialLoadStateConfigInput(
-                    selectorMode=IntrinsicInitialStateSelectorMode.ZERO_LOAD,
-                    startTime=datetime.fromisoformat(config["load_time"]["start1"])
+                initial_state_selector=IntrinsicInitialLoadStateConfigInput(
+                    selector_mode=IntrinsicInitialStateSelectorMode.ZERO_LOAD,
+                    start_time=datetime.fromisoformat(config["load_time"]["start1"]),
                 ),
-                constraintsConfig=IntrinsicConstraintsConfigInput(
-                  voltage=IntrinsicVoltageConstraintsInput(
-                      lv=IntrinsicLvVoltageConstraintInput(
-                          max=270,
-                          min=207
-                      )
-                  )
+                constraints=IntrinsicConstraintsConfigInput(
+                    voltage=IntrinsicVoltageConstraintsInput(
+                        lv=IntrinsicLvVoltageConstraintInput(
+                            max=253,
+                            min=207
+                        )
+                    )
                 ),
-                injectionResourceConfig=IntrinsicInjectionResourceConfigInput(
-                    method=IntrinsicInjectionResourceMethod.IMPORT_LOAD,
-                    loadModelType=IntrinsicLoadModelType.NEGATIVE_LOAD,
-                    powerFactor=0.8
+                injection_resource=IntrinsicInjectionResourceConfigInput(
+                    method=IntrinsicInjectionResourceMethod.EXPORT_GENERATION,
+                    load_model_type=IntrinsicLoadModelType.NEGATIVE_LOAD,
+                    power_factor=0.95
                 ),
-                searchConfig=IntrinsicSearchConfigInput(
-                    stepKwPerCustomer=2.0,
-                    maxSteps=200,
-                    lockOutCapacityZoneOnViolation=True,
-                    stopOnHvViolation=True
+                search=IntrinsicSearchConfigInput(
+                    step_kw_per_customer=1.0,
+                    max_steps=200,
+                    lock_out_capacity_zone_on_violation=True,
+                    stop_on_hv_violation=True
                 )
             ),
-            "test_intrinsic_work_package"
+            config["work_package_name"]
         ))
         print_run(result)
     except Exception as e:
@@ -63,5 +64,4 @@ async def main(argv):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(sys.argv))
+    asyncio.run(main(sys.argv))

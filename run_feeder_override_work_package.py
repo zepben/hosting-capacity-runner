@@ -50,7 +50,7 @@ async def main(argv):
                             genWattsOverride=None
                         ),
                         FixedTimeLoadOverrideInput(
-                            loadId="<load_id1>",
+                            loadId="<load_id2>",
                             loadWattsOverride=[5000.0],
                             loadVarOverride=[50.0],
                             genVarOverride=None,
@@ -86,7 +86,7 @@ async def main(argv):
     )
 
     try:
-        result = await  eas_client.mutation(Mutation.run_work_package(
+        result = await eas_client.mutation(Mutation.run_work_package(
             WorkPackageInput(
                 feederConfigs=feeder_configs,
                 generatorConfig=HcGeneratorConfigInput(
@@ -147,5 +147,4 @@ async def main(argv):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(sys.argv))
+    asyncio.run(main(sys.argv))

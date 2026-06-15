@@ -1,19 +1,19 @@
-import asyncio
-import sys
-from datetime import datetime
-
-from zepben.eas import ForecastConfigInput, TimePeriodInput, Mutation, WorkPackageInput, HcGeneratorConfigInput, \
-    HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, HcRawResultsConfigInput, \
-    HcResultProcessorConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, \
-    HcStoredResultsConfigInput, HcMetricsResultsConfigInput
-
-from utils import get_client, get_config, print_run, get_config_dir
-
 """
 This script provides an example of how to run a forecast work package for long term planning studies.
 It allows you to configure a WorkPackage to run 10+ years of timeseries load flows for a given set of scenarios for a
 configurable set of feeders.
 """
+
+import asyncio
+import sys
+from datetime import datetime
+
+from zepben.eas import ForecastConfigInput, TimePeriodInput, Mutation, WorkPackageInput, HcGeneratorConfigInput, \
+    HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, \
+    HcResultProcessorConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, \
+    HcStoredResultsConfigInput, HcMetricsResultsConfigInput
+
+from utils import get_client, get_config, print_run, get_config_dir
 
 
 async def main(argv):
@@ -44,30 +44,26 @@ async def main(argv):
                     model=HcModelConfigInput(
                         loadVMaxPu=1.2,
                         loadVMinPu=0.8,
+                        # Override reactive power for base loads/generators using power factor instead of load profile VAr values.
+                        # Set to null to use reactive power from load profiles instead.
                         pFactorBaseExports=-1,
                         pFactorBaseImports=1,
                         pFactorForecastPv=1,
+                        # fixSinglePhaseLoads defaults to true — set False here to disable the single-phase load fixer.
                         fixSinglePhaseLoads=False,
                         maxSinglePhaseLoad=15000.0,
-                        maxLoadServiceLineRatio=1.0,
+                        maxLoadServiceLineRatio=1.5,
                         maxLoadLvLineRatio=2.0,
-                        maxLoadTxRatio=2.0,
-                        maxGenTxRatio=4.0,
+                        maxLoadTxRatio=3.0,
+                        maxGenTxRatio=10.0,
                         fixOverloadingConsumers=True,
                         fixUndersizedServiceLines=True,
                         feederScenarioAllocationStrategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
+                        # closedLoopVRegEnabled defaults to true. Set False to model regulators as-is from the network model.
                         closedLoopVRegEnabled=False,
-                        closedLoopVRegSetPoint=0.9925,
                         seed=123,
                     ),
                     solve=HcSolveConfigInput(stepSizeMinutes=30),
-                    rawResults=HcRawResultsConfigInput(
-                        overloadsRaw=True,
-                        energyMetersRaw=True,
-                        energyMeterVoltagesRaw=True,
-                        voltageExceptionsRaw=True,
-                        resultsPerMeter=True
-                    ),
                 ),
 
                 resultProcessorConfig=HcResultProcessorConfigInput(
@@ -85,13 +81,15 @@ async def main(argv):
                                 calculateEmergForGenThermal=True,
                                 calculateNormalForGenThermal=True,
                             ))),
+                    # Caution: storing raw results uses significant storage — avoid for large work packages.
                     storedResults=HcStoredResultsConfigInput(
                         voltageExceptionsRaw=False,
                         overloadsRaw=True,
                         energyMetersRaw=False,
                         energyMeterVoltagesRaw=False
                     ),
-                    metrics=HcMetricsResultsConfigInput(calculatePerformanceMetrics=True)
+                    # calculatePerformanceMetrics is deprecated — prefer populateEnhancedMetrics above.
+                    metrics=HcMetricsResultsConfigInput(calculatePerformanceMetrics=False)
                 ),
                 qualityAssuranceProcessing=True
             ),
@@ -105,5 +103,4 @@ async def main(argv):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(sys.argv))
+    asyncio.run(main(sys.argv))

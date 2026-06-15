@@ -1,0 +1,16 @@
+{
+  "eas_server": {
+    "host": "<your-eas-server-host>",
+    "port": 443,
+    "protocol": "https",
+    "access_token": "<your-personal-access-token>",
+    "verify_certificate": true,
+    "ca_filename": null
+  },
+  "ewb_server": {
+    "host": "<your-ewb-server-host>",
+    "rpc_port": 443,
+    "access_token": "<your-personal-access-token>",
+    "ca_filename": null
+  }
+}
