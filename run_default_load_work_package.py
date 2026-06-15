@@ -56,7 +56,7 @@ async def main(argv):
                         pFactorBaseExports=-1,
                         pFactorBaseImports=1,
                         pFactorForecastPv=1,
-                        # fixSinglePhaseLoads defaults to true — set False here to disable the single-phase load fixer.
+                        # fixSinglePhaseLoads defaults to true - set False here to disable the single-phase load fixer.
                         fixSinglePhaseLoads=False,
                         maxSinglePhaseLoad=15000.0,
                         maxLoadServiceLineRatio=1.5,

@@ -120,21 +120,21 @@ async def main(argv):
                                 calculateEmergForLoadThermal=True,
                                 calculateNormalForLoadThermal=True,
                                 calculateCO2=True,
-                                populateConstraints=True,
-                                populateWeeklyReports=True,
-                                populateDurationCurves=True,
+                                populateConstraints=False,
+                                populateWeeklyReports=False,
+                                populateDurationCurves=False,
                                 calculateEmergForGenThermal=True,
                                 calculateNormalForGenThermal=True,
                             ))),
                     storedResults=HcStoredResultsConfigInput(
                         voltageExceptionsRaw=False,
-                        overloadsRaw=True,
+                        overloadsRaw=False,
                         energyMetersRaw=False,
                         energyMeterVoltagesRaw=False
                     ),
                     metrics=HcMetricsResultsConfigInput(calculatePerformanceMetrics=True)
                 ),
-                qualityAssuranceProcessing=True
+                qualityAssuranceProcessing=False
             ),
             work_package_name=config["work_package_name"],
         ))

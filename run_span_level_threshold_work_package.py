@@ -63,25 +63,25 @@ async def main(argv):
                                 calculateEmergForLoadThermal=True,
                                 calculateNormalForLoadThermal=True,
                                 calculateCO2=True,
-                                populateConstraints=True,
-                                populateWeeklyReports=True,
-                                populateDurationCurves=True,
+                                populateConstraints=False,
+                                populateWeeklyReports=False,
+                                populateDurationCurves=False,
                                 calculateEmergForGenThermal=True,
                                 calculateNormalForGenThermal=True,
                             )
                         )
                     ),
-                    # Caution: storing raw results uses significant storage — avoid for large work packages.
+                    # Caution: storing raw results uses significant storage - avoid for large work packages.
                     storedResults=HcStoredResultsConfigInput(
                         voltageExceptionsRaw=False,
-                        overloadsRaw=True,
+                        overloadsRaw=False,
                         energyMetersRaw=False,
                         energyMeterVoltagesRaw=False
                     ),
-                    # calculatePerformanceMetrics is deprecated — prefer populateEnhancedMetrics above.
+                    # calculatePerformanceMetrics is deprecated - prefer populateEnhancedMetrics above.
                     metrics=HcMetricsResultsConfigInput(calculatePerformanceMetrics=False)
                 ),
-                qualityAssuranceProcessing=True
+                qualityAssuranceProcessing=False
             ),
             work_package_name=config["work_package_name"],
         ))
