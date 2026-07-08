@@ -22,6 +22,10 @@ pip install -r requirements.txt
 
 The `monitor_progress.py` script can also be used to retrieve and print progress of your work package.
 
+### Interventions
+
+Use `run_intervention_work_package.py ./config` to run an Intervention work package against a prior (base) work package. Set `INTERVENTION_TYPE` near the top of the script to choose which intervention to run (COMMUNITY_BESS, LV_STATCOMS, DISTRIBUTION_TAP_OPTIMIZATION, DISTRIBUTION_TX_OLTC, TARIFF_REFORM, CONTROLLED_LOAD_HOT_WATER, DVMS, or PHASE_REBALANCING) and `BASE_WORK_PACKAGE_ID` to point at the base work package's ID, then edit the relevant `build_..._intervention()` function for that type's parameters.
+
 ### Calibration
 
 1. Use `run_calibration.py ./config` to launch a calibration workflow.
