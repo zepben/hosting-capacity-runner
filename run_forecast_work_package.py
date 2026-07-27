@@ -11,7 +11,7 @@ from datetime import datetime
 from zepben.eas import ForecastConfigInput, TimePeriodInput, Mutation, WorkPackageInput, HcGeneratorConfigInput, \
     HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, \
     HcResultProcessorConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, \
-    HcStoredResultsConfigInput, HcMetricsResultsConfigInput
+    HcStoredResultsConfigInput, HcMetricsResultsConfigInput, HcWriterType
 
 from utils import get_client, get_config, print_run, get_config_dir
 
@@ -50,14 +50,14 @@ async def main(argv):
                         pFactorBaseImports=1,
                         pFactorForecastPv=1,
                         # fixSinglePhaseLoads defaults to true - set False here to disable the single-phase load fixer.
-                        fixSinglePhaseLoads=False,
-                        maxSinglePhaseLoad=15000.0,
-                        maxLoadServiceLineRatio=1.5,
+                        fixSinglePhaseLoads=True,
+                        fixOverloadingConsumers=True,
+                        fixUndersizedServiceLines=True,
+                        maxSinglePhaseLoad=20000.0,
+                        maxLoadServiceLineRatio=2.0,
                         maxLoadLvLineRatio=2.0,
                         maxLoadTxRatio=3.0,
                         maxGenTxRatio=10.0,
-                        fixOverloadingConsumers=True,
-                        fixUndersizedServiceLines=True,
                         feederScenarioAllocationStrategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
                         # closedLoopVRegEnabled defaults to true. Set False to model regulators as-is from the network model.
                         closedLoopVRegEnabled=False,
@@ -67,7 +67,9 @@ async def main(argv):
                 ),
 
                 resultProcessorConfig=HcResultProcessorConfigInput(
+                    # writerType=POSTGRES writes results to Postgres (vs. PARQUET files). Check with your administrator which is supported for your environment.
                     writerConfig=HcWriterConfigInput(
+                        writerType=HcWriterType.POSTGRES,
                         outputWriterConfig=HcWriterOutputConfigInput(
                             enhancedMetricsConfig=HcEnhancedMetricsConfigInput(
                                 populateEnhancedMetrics=True,
@@ -88,8 +90,6 @@ async def main(argv):
                         energyMetersRaw=False,
                         energyMeterVoltagesRaw=False
                     ),
-                    # calculatePerformanceMetrics is deprecated - prefer populateEnhancedMetrics above.
-                    metrics=HcMetricsResultsConfigInput(calculatePerformanceMetrics=False)
                 ),
                 qualityAssuranceProcessing=False
             ),

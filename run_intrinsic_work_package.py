@@ -1,8 +1,9 @@
 """
-This script provides an example of how to run an Intrinsic Hosting Capacity work package.
+Example: run an Intrinsic Hosting Capacity work package.
 
-Intrinsic mode inverts the standard hosting capacity question: instead of testing a specific DER scenario,
-it finds how much additional load or generation the network can support before hitting a voltage or thermal limit.
+Finds how much load/generation the network can support before hitting a voltage/thermal limit,
+instead of testing a specific DER scenario. Full field reference: HCM docs, "How to run a
+Hosting Capacity Work Package".
 """
 
 import asyncio
@@ -11,8 +12,12 @@ from datetime import datetime
 from zepben.eas import Mutation, IntrinsicWorkPackageInput, IntrinsicSyfConfigInput, \
     IntrinsicSearchConfigInput, IntrinsicInitialLoadStateConfigInput, \
     IntrinsicInitialStateSelectorMode, IntrinsicConstraintsConfigInput, \
-    IntrinsicVoltageConstraintsInput, IntrinsicLvVoltageConstraintInput, \
-    IntrinsicInjectionResourceConfigInput, IntrinsicInjectionResourceMethod, IntrinsicLoadModelType
+    IntrinsicVoltageConstraintsInput, IntrinsicLvVoltageConstraintInput, IntrinsicHvVoltageConstraintInput, \
+    IntrinsicThermalConstraintsInput, IntrinsicThermalConstraintInput, IntrinsicRatingBasis, \
+    IntrinsicInjectionResourceConfigInput, IntrinsicInjectionResourceMethod, IntrinsicLoadModelType, \
+    IntrinsicPhaseMatching, IntrinsicAllocationConfigInput, IntrinsicAllocationMethod, \
+    IntrinsicAllocationScope, IntrinsicExistingCapacityBasis, IntrinsicCapacityGroupPlacementType, \
+    IntrinsicWriterConfigInput, HcWriterType, HcModelConfigInput, HcSolveConfigInput
 
 from utils import get_client, get_config, print_run, get_config_dir
 
@@ -30,45 +35,47 @@ async def main(argv):
                     scenario="base",
                     year=config["forecast_years"][0]
                 ),
-                # Initial state determines the baseline before generation is added.
-                # ZERO_LOAD: empty network - theoretical upper bound, no existing load or DER.
-                # FIXED_TIME: snapshot at a specific timestamp - requires start_time only.
-                # PEAK_FEEDER_EXPORT: worst-case solar moment in a window - most conservative for solar HC.
-                # PEAK_FEEDER_IMPORT: worst-case load moment - most conservative for EV/load growth.
-                # FIXED_LOAD: uniform per-customer baseline - useful for standardised cross-feeder comparisons.
+                # Baseline before generation is added - see docs "Choosing the Initial State" for
+                # mode comparison.
                 initial_state_selector=IntrinsicInitialLoadStateConfigInput(
                     selector_mode=IntrinsicInitialStateSelectorMode.ZERO_LOAD,
                     start_time=datetime.fromisoformat(config["load_time"]["start1"]),
+                    # end_time=...,  # required for PEAK_FEEDER_EXPORT/PEAK_FEEDER_IMPORT
+                    # include_loads=True, include_existing_der=True,          # FIXED_TIME/PEAK_FEEDER_EXPORT/PEAK_FEEDER_IMPORT only
+                    # load_scaling_factor=1.0, der_scaling_factor=1.0,        # FIXED_TIME/PEAK_FEEDER_EXPORT/PEAK_FEEDER_IMPORT only
+                    # per_customer_load_watts=500.0, per_customer_gen_watts=0.0,  # FIXED_LOAD only, required
+                    # per_customer_load_var=0.0, per_customer_gen_var=0.0,        # FIXED_LOAD only, required
                 ),
-                # LV voltage limits in volts (phase-to-neutral).
-                # Values here are emergency limits (VH2=260, VL2=207) - use normal limits (VH1=253, VL1=216)
-                # for a more conservative assessment. Adjust to match your network standard.
-                # Add hv= block to IntrinsicVoltageConstraintsInput to also enforce HV voltage limits (in per unit).
-                # Add thermal= block to IntrinsicConstraintsConfigInput to enforce thermal limits.
+                # LV voltage limits, volts phase-to-neutral. Adjust to your network standard.
+                # A supplied hv=/thermal= block enables that constraint - see docs "Constraints Config".
                 constraints=IntrinsicConstraintsConfigInput(
                     voltage=IntrinsicVoltageConstraintsInput(
-                        lv=IntrinsicLvVoltageConstraintInput(
-                            max=260,
-                            min=207
-                        )
-                    )
+                        lv=IntrinsicLvVoltageConstraintInput(max=260, min=207),
+                        hv=IntrinsicHvVoltageConstraintInput(min_pu=0.90, max_pu=1.10),
+                    ),
+                    thermal=IntrinsicThermalConstraintsInput(
+                        lv=IntrinsicThermalConstraintInput(percent_of_rating=100.0, rating_basis=IntrinsicRatingBasis.NORMAL),
+                        hv=IntrinsicThermalConstraintInput(percent_of_rating=100.0, rating_basis=IntrinsicRatingBasis.NORMAL),
+                    ),
                 ),
-                # EXPORT_GENERATION: find how much solar/generation the network can absorb.
-                # Change to IMPORT_LOAD to find import headroom (e.g. for EV charging or load growth).
+                # EXPORT_GENERATION: solar/gen headroom. IMPORT_LOAD: import headroom (EV/load growth).
                 injection_resource=IntrinsicInjectionResourceConfigInput(
                     method=IntrinsicInjectionResourceMethod.EXPORT_GENERATION,
                     load_model_type=IntrinsicLoadModelType.NEGATIVE_LOAD,
                     power_factor=0.95
+                    # phase_matching=...,  # only MATCH_CUSTOMER_PHASES exposed currently
+                    # pv_profile_id="some-pv-profile-id",  # required when load_model_type is PV_SYSTEM
                 ),
-                # step_kw_per_customer controls precision: smaller = finer results but more iterations.
-                # If headroom equals step_kw_per_customer * max_steps the search hit the limit without
-                # finding a constraint; increase max_steps or step size to find the true upper bound.
+                # headroom == step_kw_per_customer * max_steps means search hit the cap, not a real
+                # constraint - raise max_steps (<=10000) or step size.
                 search=IntrinsicSearchConfigInput(
                     step_kw_per_customer=1.0,
                     max_steps=200,
                     lock_out_capacity_zone_on_violation=True,
                     stop_on_hv_violation=True
-                )
+                ),
+
+                # for the solve, model and results_writer configs, see run_forecast_work_package.py, and you can copy paste it directly in here.
             ),
             config["work_package_name"]
         ))
