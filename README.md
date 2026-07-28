@@ -22,6 +22,10 @@ pip install -r requirements.txt
 
 The `monitor_progress.py` script can also be used to retrieve and print progress of your work package.
 
+### Intrinsic Hosting Capacity
+
+Use `run_intrinsic_work_package.py ./config` to find how much load or generation the network can support before hitting a voltage or thermal limit, rather than testing a specific DER scenario. `run_hv_node_headroom_work_package.py ./config` is the HV counterpart, testing HV nodes one at a time.
+
 ### Interventions
 
 Use `run_intervention_work_package.py ./config` to run an Intervention work package against a prior (base) work package. Set `INTERVENTION_TYPE` near the top of the script to choose which intervention to run (COMMUNITY_BESS, LV_STATCOMS, DISTRIBUTION_TAP_OPTIMIZATION, DISTRIBUTION_TX_OLTC, TARIFF_REFORM, CONTROLLED_LOAD_HOT_WATER, DVMS, or PHASE_REBALANCING) and `BASE_WORK_PACKAGE_ID` to point at the base work package's ID, then edit the relevant `build_..._intervention()` function for that type's parameters.
