@@ -47,7 +47,7 @@ def build_community_bess_candidate() -> CandidateInterventionConfigInput:
     return CandidateInterventionConfigInput(
         interventionType=CandidateInterventionClass.COMMUNITY_BESS,
         yearRange=YEAR_RANGE,
-        allocationLimitPerYear=999,
+        allocationLimitPerYear=999.0,
         candidateGeneration=CandidateGenerationConfigInput(
             type=CandidateGenerationType.CRITERIA,
             interventionCriteriaName="<your-candidate-criteria>",  # intervention_candidate_criteria.name
@@ -62,7 +62,7 @@ def build_lv_statcoms_candidate() -> CandidateInterventionConfigInput:
     return CandidateInterventionConfigInput(
         interventionType=CandidateInterventionClass.LV_STATCOMS,
         yearRange=YEAR_RANGE,
-        allocationLimitPerYear=999,
+        allocationLimitPerYear=999.0,
         candidateGeneration=CandidateGenerationConfigInput(
             type=CandidateGenerationType.CRITERIA,
             interventionCriteriaName="<your-candidate-criteria>",  # intervention_candidate_criteria.name
@@ -76,7 +76,7 @@ def build_distribution_tap_optimization_candidate() -> CandidateInterventionConf
     return CandidateInterventionConfigInput(
         interventionType=CandidateInterventionClass.DISTRIBUTION_TAP_OPTIMIZATION,
         yearRange=YEAR_RANGE,
-        allocationLimitPerYear=999,
+        allocationLimitPerYear=999.0,
         candidateGeneration=CandidateGenerationConfigInput(
             type=CandidateGenerationType.TAP_OPTIMIZATION,
             averageVoltageSpreadThreshold=40,
@@ -93,13 +93,63 @@ def build_distribution_tx_oltc_candidate() -> CandidateInterventionConfigInput:
     return CandidateInterventionConfigInput(
         interventionType=CandidateInterventionClass.DISTRIBUTION_TX_OLTC,
         yearRange=YEAR_RANGE,
-        allocationLimitPerYear=999,
+        allocationLimitPerYear=999.0,
         candidateGeneration=CandidateGenerationConfigInput(
             type=CandidateGenerationType.CRITERIA,
             interventionCriteriaName="<your-candidate-criteria>",  # intervention_candidate_criteria.name
         ),
         candidateAllocationCriteria="<your-allocation-criteria>",  # distribution_transformer_oltc_allocation_criteria.name
         allocationInstanceSelection=["<your-oltc-instance>"],  # distribution_transformer_oltc_instances.name; only 1 allowed
+    )
+
+
+def build_thermal_line_upgrade() -> CandidateInterventionConfigInput:
+    return CandidateInterventionConfigInput(
+        interventionType=CandidateInterventionClass.THERMAL_LINE_UPGRADE,
+        yearRange=YEAR_RANGE,
+        allocationLimitPerYear=999999.0,  # limit of 999999 m of cable upgraded per year
+        candidateGeneration=CandidateGenerationConfigInput(
+            type=CandidateGenerationType.THERMAL_LINE_UPGRADE,
+            importValue=1.0,
+            exportValue=0.1,  # Only matters in proportion to importValue, so importValue=10.0 and exportValue=1.0 is equivalent to this example
+            targetLoadingPct=80.0,
+        ),
+        allocationInstanceSelection=["<your-conductor-type>"],  # conductor_catalog.id; omit to allow any conductor to be chosen
+    )
+
+
+def build_thermal_transformer_upgrade() -> CandidateInterventionConfigInput:
+    return CandidateInterventionConfigInput(
+        interventionType=CandidateInterventionClass.THERMAL_TRANSFORMER_UPGRADE,
+        yearRange=YEAR_RANGE,
+        allocationLimitPerYear=999.0,  # limit of 999 transformers upgraded per year
+        candidateGeneration=CandidateGenerationConfigInput(
+            type=CandidateGenerationType.THERMAL_TRANSFORMER_UPGRADE,
+            importValue=1.0,
+            exportValue=0.1,  # Only matters in proportion to importValue, so importValue=10.0 and exportValue=1.0 is equivalent to this example
+            targetLoadingPct=80.0,
+        ),
+        allocationInstanceSelection=["<your-transformer-type>"],  # transformer_catalog.id; omit to allow any transformer to be chosen
+    )
+
+
+def build_voltage_line_upgrade() -> CandidateInterventionConfigInput:
+    return CandidateInterventionConfigInput(
+        interventionType=CandidateInterventionClass.VOLTAGE_LINE_UPGRADE,
+        yearRange=YEAR_RANGE,
+        allocationLimitPerYear=999999.0,  # limit of 999999 m of cable upgraded per year
+        candidateGeneration=CandidateGenerationConfigInput(
+            type=CandidateGenerationType.VOLTAGE_LINE_UPGRADE,
+            targetVoltageSwingPu=0.16,
+            voltageDeltaThresholdPu=0.08,
+            upstreamEffectivenessFactor=1.0,
+            internalMzEffectivenessFactor=0.5,
+            defaultUpgradeReductionFactor=0.6,
+            targetHeadroomFactor=1.1,
+            minLineLengthM=5.0,
+            minAvgAbsDeltaPu=0.001,
+        ),
+        allocationInstanceSelection=["<your-conductor-type>"],  # conductor_catalog.id; omit to allow any conductor to be chosen
     )
 
 
@@ -139,6 +189,9 @@ CANDIDATE_BUILDERS = {
     CandidateInterventionClass.LV_STATCOMS: build_lv_statcoms_candidate,
     CandidateInterventionClass.DISTRIBUTION_TAP_OPTIMIZATION: build_distribution_tap_optimization_candidate,
     CandidateInterventionClass.DISTRIBUTION_TX_OLTC: build_distribution_tx_oltc_candidate,
+    CandidateInterventionClass.THERMAL_LINE_UPGRADE: build_thermal_line_upgrade,
+    CandidateInterventionClass.THERMAL_TRANSFORMER_UPGRADE: build_thermal_transformer_upgrade,
+    CandidateInterventionClass.VOLTAGE_LINE_UPGRADE: build_voltage_line_upgrade,
 }
 
 

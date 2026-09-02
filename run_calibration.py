@@ -5,7 +5,7 @@ from datetime import datetime
 from zepben.eas import HcFeederScenarioAllocationStrategy, HcGeneratorConfigInput, \
     HcModelConfigInput, Mutation
 
-from utils import get_client, get_config_dir, fetch_feeders, print_run
+from utils import get_client, get_config_dir, print_run
 
 """
 Perform a calibration run which will utilise PQV data to model the network, and output voltage deltas between the PQV actuals and the
