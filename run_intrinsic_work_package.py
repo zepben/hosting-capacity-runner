@@ -9,15 +9,14 @@ Hosting Capacity Work Package".
 import asyncio
 import sys
 from datetime import datetime
+
 from zepben.eas import Mutation, IntrinsicWorkPackageInput, IntrinsicSyfConfigInput, \
     IntrinsicSearchConfigInput, IntrinsicInitialLoadStateConfigInput, \
     IntrinsicInitialStateSelectorMode, IntrinsicConstraintsConfigInput, \
     IntrinsicVoltageConstraintsInput, IntrinsicLvVoltageConstraintInput, IntrinsicHvVoltageConstraintInput, \
     IntrinsicThermalConstraintsInput, IntrinsicThermalConstraintInput, IntrinsicRatingBasis, \
     IntrinsicInjectionResourceConfigInput, IntrinsicInjectionResourceMethod, IntrinsicLoadModelType, \
-    IntrinsicPhaseMatching, IntrinsicAllocationConfigInput, IntrinsicAllocationMethod, \
-    IntrinsicAllocationScope, IntrinsicExistingCapacityBasis, IntrinsicCapacityGroupPlacementType, \
-    IntrinsicWriterConfigInput, HcWriterType, HcModelConfigInput, HcSolveConfigInput
+    IntrinsicWriterConfigInput, HcWriterType
 
 from utils import get_client, get_config, print_run, get_config_dir
 

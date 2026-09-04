@@ -11,7 +11,7 @@ from datetime import datetime
 from zepben.eas import ForecastConfigInput, TimePeriodInput, Mutation, WorkPackageInput, HcGeneratorConfigInput, \
     HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, \
     HcResultProcessorConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, \
-    HcStoredResultsConfigInput, HcMetricsResultsConfigInput, HcWriterType
+    HcStoredResultsConfigInput, HcWriterType
 
 from utils import get_client, get_config, print_run, get_config_dir
 
