@@ -1,19 +1,15 @@
 """
-This script provides an example of how to run an Intervention work package.
+Example: run a stacked Intervention work package.
 
-An intervention work package is a normal forecast work package with an additional `intervention`
-block set, pointing `baseWorkPackageId` at a prior work package. That base work
-package must have been run with: EnhancedMetrics=True, distTransformers=True,
-ScenarioAllocationStrategy=ADDITIVE, and either a single year, or a contiguous range of years
+A normal forecast work package with an `intervention` block set. The block combines up to one
+candidate intervention with any of phaseRebalanceProportions, dvms and loadReshaping, all applied
+to the same network. See HCS docs, "How to run an Intervention Work Package" for the base work
+package prerequisites, "Interventions Options" for per-type parameters, and "Interventions
+Concepts" for stacking vs chaining.
 
-See the "How to run an Intervention Work Package" guide in the HCS documentation for details
+Remember to update the standard model config arguments at the bottom to match your parent work package.
 
-Set INTERVENTION_TYPE below to choose which intervention to run. 
-
-Note: `specificAllocationInstance` (single instance name) is used below for COMMUNITY_BESS,
-LV_STATCOMS, and DISTRIBUTION_TX_OLTC. An upcoming release replaces this with
-`allocationInstanceSelection` (a list of instance names), which will let COMMUNITY_BESS size
-across multiple candidate instances instead of just one. Update these examples once that ships.
+Requires zepben.eas 2.18.0b1+.
 """
 
 import asyncio
@@ -23,138 +19,138 @@ from zepben.eas import ForecastConfigInput, TimePeriodInput, Mutation, WorkPacka
     HcModelConfigInput, HcFeederScenarioAllocationStrategy, HcSolveConfigInput, HcMeterPlacementConfigInput, \
     HcResultProcessorConfigInput, HcWriterConfigInput, HcWriterOutputConfigInput, HcEnhancedMetricsConfigInput, \
     HcStoredResultsConfigInput, HcMetricsResultsConfigInput, \
-    InterventionConfigInput, InterventionClass, YearRangeInput, DvmsConfigInput, DvmsRegulatorConfigInput, \
-    PhaseRebalanceProportionsInput, CandidateGenerationConfigInput, CandidateGenerationType
+    InterventionConfigInput, CandidateInterventionConfigInput, CandidateInterventionClass, \
+    YearRangeInput, DvmsConfigInput, DvmsRegulatorConfigInput, PhaseRebalanceProportionsInput, \
+    LoadReshapingConfigInput, CandidateGenerationConfigInput, CandidateGenerationType
 from utils import get_client, get_config, print_run, get_config_dir
 
-# Choose which intervention to run.
-INTERVENTION_TYPE = InterventionClass.COMMUNITY_BESS
+# The parent (previously called base) work package to compare against.
+PARENT_WORK_PACKAGE_ID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
-# Work package ID of the base (non-intervention) work package to compare against.
-BASE_WORK_PACKAGE_ID = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+# Optional - if omitted, defaults to the work package's full year range.
+YEAR_RANGE = YearRangeInput(minYear=1, maxYear=9999)
 
-# Year range for the intervention. Must be a single year or a contiguous range, and should match the base work package's years.
-YEAR_RANGE = YearRangeInput(minYear=2026, maxYear=2030)
+# --- Choose what to run -------------------------------------------------------------------------
+# One candidate intervention, plus any combination of the three non-candidate ones.
 
-# COMMUNITY_BESS
-def build_community_bess_intervention() -> InterventionConfigInput:
-    return InterventionConfigInput(
-        baseWorkPackageId=BASE_WORK_PACKAGE_ID,
+# Set to None to run with no candidate intervention.
+CANDIDATE_INTERVENTION = CandidateInterventionClass.COMMUNITY_BESS
+
+ENABLE_LOAD_RESHAPING = True  # Previously called TARIFF_REFORM and CONTROLLED_LOAD_HOT_WATER
+ENABLE_PHASE_REBALANCING = True
+ENABLE_DVMS = False  # Runs at every time step (computationally expensive)
+
+
+# --- Candidate interventions: pick AT MOST 1 --------------------------------------------------
+
+def build_community_bess_candidate() -> CandidateInterventionConfigInput:
+    return CandidateInterventionConfigInput(
+        interventionType=CandidateInterventionClass.COMMUNITY_BESS,
         yearRange=YEAR_RANGE,
-        interventionType=InterventionClass.COMMUNITY_BESS,
-        allocationLimitPerYear=20,  # Maximum number of batteries to install per year
+        allocationLimitPerYear=999,
         candidateGeneration=CandidateGenerationConfigInput(
-            type=CandidateGenerationType.CRITERIA,  # Required for COMMUNITY_BESS
-            interventionCriteriaName="bess-intervention-criteria-gen-thermal",  # References intervention_candidate_criteria.name
+            type=CandidateGenerationType.CRITERIA,
+            interventionCriteriaName="<your-candidate-criteria>",  # intervention_candidate_criteria.name
+            sizingLookaheadYears=3,
         ),
-        allocationCriteria="bess_allocation_criteria",  # References bess_allocation_criteria.name
-        specificAllocationInstance="EcoSTORE",  # Optional; omit to consider all instances in bess_instances
-        sizingLookaheadYears=3,  # Optional, defaults to 1
+        candidateAllocationCriteria="<your-allocation-criteria>",  # bess_allocation_criteria.name
+        allocationInstanceSelection=["<your-bess-instance>"],  # bess_instances.name; omit to size across all
     )
 
-# LV_STATCOMS
-def build_lv_statcoms_intervention() -> InterventionConfigInput:
-    return InterventionConfigInput(
-        baseWorkPackageId=BASE_WORK_PACKAGE_ID,
+
+def build_lv_statcoms_candidate() -> CandidateInterventionConfigInput:
+    return CandidateInterventionConfigInput(
+        interventionType=CandidateInterventionClass.LV_STATCOMS,
         yearRange=YEAR_RANGE,
-        interventionType=InterventionClass.LV_STATCOMS,
-        allocationLimitPerYear=20,  # Maximum number of LV STATCOMs to install per year
+        allocationLimitPerYear=999,
         candidateGeneration=CandidateGenerationConfigInput(
-            type=CandidateGenerationType.CRITERIA,  # Required for LV_STATCOMS
-            interventionCriteriaName="lvstatcom-intervention-criteria",  # References intervention_candidate_criteria.name
+            type=CandidateGenerationType.CRITERIA,
+            interventionCriteriaName="<your-candidate-criteria>",  # intervention_candidate_criteria.name
         ),
-        allocationCriteria="lv_statcom_allocation_criteria_2",  # References lv_statcom_allocation_criteria.name
-        specificAllocationInstance="lv_statcom_instance_1",  # Optional; if omitted, first matching instance is used
+        candidateAllocationCriteria="<your-allocation-criteria>",  # lv_statcom_allocation_criteria.name
+        allocationInstanceSelection=["<your-statcom-instance>"],  # lv_statcom_instances.name
     )
 
-# DISTRIBUTION_TAP_OPTIMIZATION
-def build_distribution_tap_optimization_intervention() -> InterventionConfigInput:
-    return InterventionConfigInput(
-        baseWorkPackageId=BASE_WORK_PACKAGE_ID,
+
+def build_distribution_tap_optimization_candidate() -> CandidateInterventionConfigInput:
+    return CandidateInterventionConfigInput(
+        interventionType=CandidateInterventionClass.DISTRIBUTION_TAP_OPTIMIZATION,
         yearRange=YEAR_RANGE,
-        interventionType=InterventionClass.DISTRIBUTION_TAP_OPTIMIZATION,
-        allocationLimitPerYear=30,  # Optional; omit for unlimited transformers per year
+        allocationLimitPerYear=999,
         candidateGeneration=CandidateGenerationConfigInput(
-            type=CandidateGenerationType.TAP_OPTIMIZATION,  # Required for DISTRIBUTION_TAP_OPTIMIZATION
-            # Voltage thresholds, applied per measurement zone per year
+            type=CandidateGenerationType.TAP_OPTIMIZATION,
             averageVoltageSpreadThreshold=40,
             voltageUnderLimitHoursThreshold=48,
             voltageOverLimitHoursThreshold=48,
-            # Tap weighting thresholds (direction arbitration); defaults (-10.0, 10.0) suit most cases
             tapWeightingFactorLowerThreshold=-10.0,
             tapWeightingFactorUpperThreshold=10.0,
         ),
+        # This type allocates directly from candidateGeneration - no candidateAllocationCriteria.
     )
 
-# DISTRIBUTION_TX_OLTC
-def build_distribution_tx_oltc_intervention() -> InterventionConfigInput:
-    return InterventionConfigInput(
-        baseWorkPackageId=BASE_WORK_PACKAGE_ID,
+
+def build_distribution_tx_oltc_candidate() -> CandidateInterventionConfigInput:
+    return CandidateInterventionConfigInput(
+        interventionType=CandidateInterventionClass.DISTRIBUTION_TX_OLTC,
         yearRange=YEAR_RANGE,
-        interventionType=InterventionClass.DISTRIBUTION_TX_OLTC,
-        allocationLimitPerYear=50,  # Maximum number of OLTCs to install per year
+        allocationLimitPerYear=999,
         candidateGeneration=CandidateGenerationConfigInput(
-            type=CandidateGenerationType.CRITERIA,  # Required for DISTRIBUTION_TX_OLTC
-            interventionCriteriaName="threshold_set_2",  # References intervention_candidate_criteria.name
+            type=CandidateGenerationType.CRITERIA,
+            interventionCriteriaName="<your-candidate-criteria>",  # intervention_candidate_criteria.name
         ),
-        allocationCriteria="distribution_transformer_oltc_allocation_criteria_1",  # References distribution_transformer_oltc_allocation_criteria.name
-        specificAllocationInstance="distribution_transformer_oltc_instance_1",  # Optional; only 1 instance allowed
+        candidateAllocationCriteria="<your-allocation-criteria>",  # distribution_transformer_oltc_allocation_criteria.name
+        allocationInstanceSelection=["<your-oltc-instance>"],  # distribution_transformer_oltc_instances.name; only 1 allowed
     )
 
-# TARIFF_REFORM
-def build_tariff_reform_intervention() -> InterventionConfigInput:
-    return InterventionConfigInput(
-        baseWorkPackageId=BASE_WORK_PACKAGE_ID,
-        yearRange=YEAR_RANGE,
-        interventionType=InterventionClass.TARIFF_REFORM,  # or InterventionClass.CONTROLLED_LOAD_HOT_WATER
-        allocationCriteria="load_reshape_strategy_1",  # References criteria_name in load_reshape_strategies
+
+# --- Independent interventions: any combination, with or without a candidate ---------------------
+
+def build_load_reshaping() -> LoadReshapingConfigInput:
+    return LoadReshapingConfigInput(
+        loadShapeCriteria="<your-load-reshape-strategy>",  # load_reshape_strategies.criteria_name
     )
 
-# DVMS
-def build_dvms_intervention() -> InterventionConfigInput:
-    return InterventionConfigInput(
-        baseWorkPackageId=BASE_WORK_PACKAGE_ID,
-        yearRange=YEAR_RANGE,
-        interventionType=InterventionClass.DVMS,
-        dvms=DvmsConfigInput(
-            lowerLimit=0.9,             # Minimum acceptable voltage (per unit)
-            upperLimit=1.1,             # Maximum acceptable voltage (per unit)
-            lowerPercentile=5,          # Lower percentile of customer voltages to consider
-            upperPercentile=95,         # Upper percentile of customer voltages to consider
-            maxIterations=3,            # Maximum tap adjustment attempts per time step
-            regulatorConfig=DvmsRegulatorConfigInput(
-                puTarget=1.0,                 # Target voltage (per unit)
-                puDeadbandPercent=12,         # Deadband width as % of target
-                maxTapChangePerStep=2,        # Maximum tap positions to change per iteration
-                allowPushToLimit=True,        # Allow tap changes that improve one side of the voltage distribution even if worsening the other
-            ),
-        ),
-    )
 
-# PHASE_REBALANCING
-def build_phase_rebalancing_intervention() -> InterventionConfigInput:
-    return InterventionConfigInput(
-        baseWorkPackageId=BASE_WORK_PACKAGE_ID,
-        yearRange=YEAR_RANGE,
-        interventionType=InterventionClass.PHASE_REBALANCING,
-        phaseRebalanceProportions=PhaseRebalanceProportionsInput(
-            a=1,  # Target proportions for redistributing single-phase customers across phases.
-            b=1,  # Values do not need to sum to 1 (they are normalized internally), but must
-            c=1,  # all be non-negative. a=b=c=1 gives an even distribution.
+def build_dvms() -> DvmsConfigInput:
+    return DvmsConfigInput(
+        lowerLimit=0.9,
+        upperLimit=1.1,
+        lowerPercentile=5,
+        upperPercentile=95,
+        maxIterations=3,
+        regulatorConfig=DvmsRegulatorConfigInput(
+            puTarget=1.0,
+            puDeadbandPercent=3,
+            maxTapChangePerStep=2,
+            allowPushToLimit=False,
         ),
     )
 
 
-INTERVENTION_BUILDERS = {
-    InterventionClass.COMMUNITY_BESS: build_community_bess_intervention,
-    InterventionClass.LV_STATCOMS: build_lv_statcoms_intervention,
-    InterventionClass.DISTRIBUTION_TAP_OPTIMIZATION: build_distribution_tap_optimization_intervention,
-    InterventionClass.DISTRIBUTION_TX_OLTC: build_distribution_tx_oltc_intervention,
-    InterventionClass.TARIFF_REFORM: build_tariff_reform_intervention,
-    InterventionClass.CONTROLLED_LOAD_HOT_WATER: build_tariff_reform_intervention,
-    InterventionClass.DVMS: build_dvms_intervention,
-    InterventionClass.PHASE_REBALANCING: build_phase_rebalancing_intervention,
+def build_phase_rebalancing() -> PhaseRebalanceProportionsInput:
+    # Normalized internally, so a=b=c=1 is an even distribution.
+    return PhaseRebalanceProportionsInput(a=1, b=1, c=1)
+
+
+# --- Assemble the intervention block ------------------------------------------------------------
+
+CANDIDATE_BUILDERS = {
+    CandidateInterventionClass.COMMUNITY_BESS: build_community_bess_candidate,
+    CandidateInterventionClass.LV_STATCOMS: build_lv_statcoms_candidate,
+    CandidateInterventionClass.DISTRIBUTION_TAP_OPTIMIZATION: build_distribution_tap_optimization_candidate,
+    CandidateInterventionClass.DISTRIBUTION_TX_OLTC: build_distribution_tx_oltc_candidate,
 }
+
+
+# Unset blocks are left as None, which disables that intervention.
+def build_intervention() -> InterventionConfigInput:
+    return InterventionConfigInput(
+        parentWorkPackageId=PARENT_WORK_PACKAGE_ID,
+        candidateIntervention=CANDIDATE_BUILDERS[CANDIDATE_INTERVENTION]() if CANDIDATE_INTERVENTION else None,
+        loadReshaping=build_load_reshaping() if ENABLE_LOAD_RESHAPING else None,
+        phaseRebalanceProportions=build_phase_rebalancing() if ENABLE_PHASE_REBALANCING else None,
+        dvms=build_dvms() if ENABLE_DVMS else None,
+    )
 
 
 async def main(argv):
@@ -162,10 +158,8 @@ async def main(argv):
     config = get_config(config_dir)
     eas_client = get_client(config_dir)
 
-    # Forecast Config example set up.
-    # This should match the base work package's configuration (feeders, years, scenarios, load
-    # time period, model parameters, etc.) other than the intervention block itself, so that any
-    # difference in results can only be attributed to the intervention.
+    # Must match the parent work package's config apart from the intervention block, otherwise
+    # result differences can't be attributed to the intervention.
     forecast_config = ForecastConfigInput(
         feeders=config["feeders"],
         years=config["forecast_years"],
@@ -176,7 +170,7 @@ async def main(argv):
         )
     )
 
-    intervention_config = INTERVENTION_BUILDERS[INTERVENTION_TYPE]()
+    intervention_config = build_intervention()
 
     try:
         result = await eas_client.mutation(Mutation.run_work_package(
@@ -197,12 +191,11 @@ async def main(argv):
                         maxGenTxRatio=10.0,
                         fixOverloadingConsumers=True,
                         fixUndersizedServiceLines=True,
-                        # Must be ADDITIVE (the default) - candidate-based interventions will fail to build otherwise.
+                        # Candidate interventions will fail to build unless this is ADDITIVE (the default).
                         feederScenarioAllocationStrategy=HcFeederScenarioAllocationStrategy.ADDITIVE,
                         closedLoopVRegEnabled=False,
                         seed=123,
-                        # Measurement zones must be set at the distribution transformer level for
-                        # candidate-based interventions and NOT set at the Switch / LV feeder level.
+                        # Candidate interventions need distTransformers zones, not Switch / LV feeder.
                         meterPlacementConfig=HcMeterPlacementConfigInput(
                             feederHead=True,
                             distTransformers=True,
